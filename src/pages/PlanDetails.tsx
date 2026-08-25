@@ -7,6 +7,8 @@ import { useCouple } from '../contexts/CoupleContext';
 import { useAuth } from '../contexts/AuthContext';
 import { Plan } from '../types';
 import { PlanForm } from '../components/PlanForm';
+import { PlanComments } from '../components/PlanComments';
+import { PlanPhotos } from '../components/PlanPhotos';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -248,27 +250,17 @@ export function PlanDetails() {
 
         {/* Future Extensions Placeholders */}
         <div className="space-y-3 pt-6">
-          <h3 className="text-sm font-medium text-stone-500 uppercase tracking-wider px-2">Memórias & Notas</h3>
           
-          <div className="bg-white border border-stone-200/60 rounded-3xl p-4 flex items-center gap-4 text-stone-400 hover:bg-stone-50 transition-colors cursor-not-allowed group">
-            <div className="w-10 h-10 rounded-full bg-stone-100 flex items-center justify-center shrink-0 group-hover:bg-orange-50 group-hover:text-orange-500 transition-colors">
-              <ImageIcon size={20} />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-stone-700">Adicionar Fotos</p>
-              <p className="text-xs text-stone-500">Em breve: Registre momentos</p>
-            </div>
+          {/* Componente de Fotos/Galeria */}
+          <PlanPhotos planId={plan.id} />
+
+
+          
+          {/* Componente de Comentários */}
+          <div className="pt-2">
+            <PlanComments planId={plan.id} />
           </div>
 
-          <div className="bg-white border border-stone-200/60 rounded-3xl p-4 flex items-center gap-4 text-stone-400 hover:bg-stone-50 transition-colors cursor-not-allowed group">
-            <div className="w-10 h-10 rounded-full bg-stone-100 flex items-center justify-center shrink-0 group-hover:bg-orange-50 group-hover:text-orange-500 transition-colors">
-              <MessageCircle size={20} />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-stone-700">Comentários</p>
-              <p className="text-xs text-stone-500">Em breve: Deixe notas e comentários</p>
-            </div>
-          </div>
 
           <div className="bg-white border border-stone-200/60 rounded-3xl p-4 flex items-center gap-4 text-stone-400 hover:bg-stone-50 transition-colors cursor-not-allowed group">
             <div className="w-10 h-10 rounded-full bg-stone-100 flex items-center justify-center shrink-0 group-hover:bg-orange-50 group-hover:text-orange-500 transition-colors">
