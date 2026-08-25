@@ -11,6 +11,7 @@ import { RequireCoupleRoute } from './components/RequireCoupleRoute';
 import { Layout } from './components/Layout';
 import { Dashboard } from './pages/Dashboard';
 import { PlansList } from './pages/PlansList';
+import { PlanDetails } from './pages/PlanDetails';
 import { Profile } from './pages/Profile';
 import { Auth } from './pages/Auth';
 import { SetupSpace } from './pages/SetupSpace';
@@ -32,6 +33,7 @@ export default function App() {
                 <Route path="/" element={<Layout />}>
                   <Route index element={<Dashboard />} />
                   <Route path="plans" element={<PlansList />} />
+                  <Route path="plans/:id" element={<PlanDetails />} />
                   <Route path="profile" element={<Profile />} />
                 </Route>
               </Route>

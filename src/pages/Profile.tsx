@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { mockCouple } from '../data';
 import { motion } from 'motion/react';
 import { Heart, Settings, LogOut, Copy, Check } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';

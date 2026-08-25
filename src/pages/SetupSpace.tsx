@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Heart, Loader2, Link as LinkIcon, Plus } from 'lucide-react';

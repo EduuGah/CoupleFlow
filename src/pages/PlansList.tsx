@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Plus, CheckCircle2, Circle, MoreVertical, Trash2, Edit2, Loader2, Tag, CalendarClock, User, Search, Filter as FilterIcon } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -179,7 +180,7 @@ export function PlansList() {
 
   // Contagem total para a pílula "Todas" na barra de categorias (antes do filtro de categoria)
   const totalInCurrentFilters = useMemo(() => {
-    return Object.values(categoryCounts).reduce((a, b) => a + b, 0);
+    return Object.values(categoryCounts).reduce((a: number, b: number) => a + b, 0);
   }, [categoryCounts]);
 
   return (
@@ -356,9 +357,11 @@ export function PlansList() {
               
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2">
-                  <h3 className={`font-medium truncate ${plan.status === 'fizemos' ? 'text-stone-400 line-through' : 'text-stone-900'}`}>
-                    {plan.title}
-                  </h3>
+                  <Link to={`/plans/${plan.id}`} className="hover:underline">
+                    <h3 className={`font-medium truncate ${plan.status === 'fizemos' ? 'text-stone-400 line-through' : 'text-stone-900'}`}>
+                      {plan.title}
+                    </h3>
+                  </Link>
                   <button 
                     onClick={() => setOpenMenuId(openMenuId === plan.id ? null : plan.id)} 
                     className="p-1 text-stone-400 hover:text-stone-600 rounded-md"
@@ -368,7 +371,9 @@ export function PlansList() {
                 </div>
                 
                 {plan.description && (
-                  <p className="text-sm text-stone-500 mt-1 line-clamp-2">{plan.description}</p>
+                  <Link to={`/plans/${plan.id}`} className="block mt-1">
+                    <p className="text-sm text-stone-500 line-clamp-2">{plan.description}</p>
+                  </Link>
                 )}
                 
                 <div className="flex items-center gap-2 mt-3">
