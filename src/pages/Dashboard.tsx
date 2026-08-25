@@ -26,7 +26,7 @@ export function Dashboard() {
         .from('plans')
         .select('*', { count: 'exact', head: true })
         .eq('couple_id', couple.id)
-        .eq('status', 'pendente');
+        .in('status', ['quero_fazer', 'planejado']);
         
       if (!error && count !== null) {
         setPendingCount(count);
@@ -59,7 +59,7 @@ export function Dashboard() {
       <div className="grid grid-cols-2 gap-4">
         <div className="bg-orange-100/50 border border-orange-200/50 rounded-3xl p-5">
           <div className="text-4xl font-light text-orange-600 mb-1">{pendingCount}</div>
-          <div className="text-sm font-medium text-orange-800">Planos pendentes</div>
+          <div className="text-sm font-medium text-orange-800">Planos na lista</div>
         </div>
         
         <Link to="/plans" className="bg-stone-100 border border-stone-200/60 rounded-3xl p-5 flex flex-col justify-center items-center text-center hover:bg-stone-200 transition-colors">

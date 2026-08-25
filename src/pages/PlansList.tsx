@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
-import { Plus, CheckCircle2, Circle, MoreVertical, Trash2, Edit2, Loader2, Tag } from 'lucide-react';
+import { Plus, CheckCircle2, Circle, MoreVertical, Trash2, Edit2, Loader2, Tag, CalendarClock } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useCouple } from '../contexts/CoupleContext';
 import { Plan, DEFAULT_CATEGORIES } from '../types';
@@ -12,7 +12,7 @@ export function PlansList() {
   const [loading, setLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState<Plan | undefined>();
-  const [activeTab, setActiveTab] = useState<'pendente' | 'concluido'>('pendente');
+  const [activeTab, setActiveTab] = useState<'quero_fazer' | 'planejado' | 'fizemos'>('quero_fazer');
   const [selectedCategory, setSelectedCategory] = useState<string>('Todas');
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
@@ -35,15 +35,22 @@ export function PlansList() {
     fetchPlans();
   }, [couple]);
 
-  const toggleStatus = async (plan: Plan) => {
-    const newStatus = plan.status === 'pendente' ? 'concluido' : 'pendente';
-    // Otimistic update
-    setPlans(plans.map(p => p.id === plan.id ? { ...p, status: newStatus } : p));
+  const changeStatus = async (plan: Plan, newStatus: string) => {
+    const payload: any = { status: newStatus };
+    if (newStatus === 'fizemos' && plan.status !== 'fizemos') {
+      payload.completed_at = new Date().toISOString();
+    } else if (newStatus !== 'fizemos' && plan.status === 'fizemos') {
+      payload.completed_at = null;
+    }
+
+    // Optimistic update
+    setPlans(plans.map(p => p.id === plan.id ? { ...p, ...payload } : p));
     
     await supabase
       .from('plans')
-      .update({ status: newStatus })
+      .update(payload)
       .eq('id', plan.id);
+    setOpenMenuId(null);
   };
 
   const deletePlan = async (id: string) => {
@@ -86,16 +93,22 @@ export function PlansList() {
 
       <div className="flex gap-2 p-1 bg-stone-100 rounded-xl">
         <button 
-          onClick={() => setActiveTab('pendente')} 
-          className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${activeTab === 'pendente' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}
+          onClick={() => setActiveTab('quero_fazer')} 
+          className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${activeTab === 'quero_fazer' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}
         >
-          Pendentes
+          Quero Fazer
         </button>
         <button 
-          onClick={() => setActiveTab('concluido')} 
-          className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${activeTab === 'concluido' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}
+          onClick={() => setActiveTab('planejado')} 
+          className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${activeTab === 'planejado' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}
         >
-          Concluídos
+          Planejado
+        </button>
+        <button 
+          onClick={() => setActiveTab('fizemos')} 
+          className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${activeTab === 'fizemos' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}
+        >
+          Fizemos
         </button>
       </div>
 
@@ -145,15 +158,21 @@ export function PlansList() {
           {filteredPlans.map(plan => (
             <div key={plan.id} className="bg-white border border-stone-200/60 rounded-2xl p-4 shadow-sm flex gap-4 relative">
               <button 
-                onClick={() => toggleStatus(plan)} 
-                className="mt-1 shrink-0 text-stone-400 hover:text-orange-500 transition-colors"
+                onClick={() => changeStatus(plan, plan.status === 'fizemos' ? 'quero_fazer' : 'fizemos')} 
+                className={`mt-1 shrink-0 transition-colors ${
+                  plan.status === 'fizemos' ? 'text-green-500' :
+                  plan.status === 'planejado' ? 'text-blue-500 hover:text-green-500' :
+                  'text-stone-300 hover:text-green-500'
+                }`}
               >
-                {plan.status === 'concluido' ? <CheckCircle2 className="text-green-500" size={24} /> : <Circle size={24} />}
+                {plan.status === 'fizemos' ? <CheckCircle2 size={24} /> : 
+                 plan.status === 'planejado' ? <CalendarClock size={24} /> : 
+                 <Circle size={24} />}
               </button>
               
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2">
-                  <h3 className={`font-medium truncate ${plan.status === 'concluido' ? 'text-stone-400 line-through' : 'text-stone-900'}`}>
+                  <h3 className={`font-medium truncate ${plan.status === 'fizemos' ? 'text-stone-400 line-through' : 'text-stone-900'}`}>
                     {plan.title}
                   </h3>
                   <button 
@@ -183,7 +202,23 @@ export function PlansList() {
               </div>
               
               {openMenuId === plan.id && (
-                <div className="absolute top-12 right-4 bg-white border border-stone-200 rounded-xl shadow-lg p-1 z-10 min-w-[120px] flex flex-col">
+                <div className="absolute top-12 right-4 bg-white border border-stone-200 rounded-xl shadow-lg p-1 z-10 min-w-[150px] flex flex-col">
+                  {plan.status !== 'quero_fazer' && (
+                    <button onClick={() => changeStatus(plan, 'quero_fazer')} className="flex items-center gap-2 w-full text-left px-3 py-2 text-sm text-stone-700 hover:bg-stone-50 rounded-lg">
+                      <Circle size={14} /> Quero Fazer
+                    </button>
+                  )}
+                  {plan.status !== 'planejado' && (
+                    <button onClick={() => changeStatus(plan, 'planejado')} className="flex items-center gap-2 w-full text-left px-3 py-2 text-sm text-stone-700 hover:bg-stone-50 rounded-lg">
+                      <CalendarClock size={14} /> Planejado
+                    </button>
+                  )}
+                  {plan.status !== 'fizemos' && (
+                    <button onClick={() => changeStatus(plan, 'fizemos')} className="flex items-center gap-2 w-full text-left px-3 py-2 text-sm text-stone-700 hover:bg-stone-50 rounded-lg">
+                      <CheckCircle2 size={14} /> Fizemos
+                    </button>
+                  )}
+                  <div className="h-px bg-stone-100 my-1"></div>
                   <button 
                     onClick={() => openEdit(plan)} 
                     className="flex items-center gap-2 w-full text-left px-3 py-2 text-sm text-stone-700 hover:bg-stone-50 rounded-lg"

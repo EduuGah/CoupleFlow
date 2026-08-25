@@ -11,7 +11,7 @@ export const DEFAULT_CATEGORIES = [
 ] as const;
 
 export type PlanCategory = typeof DEFAULT_CATEGORIES[number] | string;
-export type PlanStatus = 'pendente' | 'concluido';
+export type PlanStatus = 'quero_fazer' | 'planejado' | 'fizemos';
 export type PlanPriority = 'baixa' | 'media' | 'alta';
 
 export interface Plan {
