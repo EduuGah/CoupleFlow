@@ -8,8 +8,16 @@ interface Couple {
   anniversary_date: string | null;
 }
 
+interface Member {
+  id: string;
+  name: string | null;
+  email: string | null;
+  avatar_url: string | null;
+}
+
 interface CoupleContextType {
   couple: Couple | null;
+  members: Record<string, Member>;
   loadingCouple: boolean;
   refreshCouple: () => Promise<void>;
 }
@@ -19,18 +27,18 @@ const CoupleContext = createContext<CoupleContextType | undefined>(undefined);
 export function CoupleProvider({ children }: { children: ReactNode }) {
   const { session } = useAuth();
   const [couple, setCouple] = useState<Couple | null>(null);
+  const [members, setMembers] = useState<Record<string, Member>>({});
   const [loadingCouple, setLoadingCouple] = useState(true);
 
   const fetchCouple = async () => {
     if (!session?.user) {
       setCouple(null);
+      setMembers({});
       setLoadingCouple(false);
       return;
     }
 
     try {
-      // Como o RLS só permite ver o casal se o usuário estiver em couple_members,
-      // basta tentarmos buscar qualquer casal. Se retornar algo, ele tem um espaço.
       const { data, error } = await supabase
         .from('couples')
         .select('*')
@@ -38,11 +46,24 @@ export function CoupleProvider({ children }: { children: ReactNode }) {
         .single();
 
       if (error && error.code !== 'PGRST116') {
-        // PGRST116 é o erro de 'nenhuma linha encontrada', o que é normal se não tiver casal
         console.error('Erro ao buscar espaço do casal:', error);
       }
 
       setCouple(data || null);
+
+      if (data) {
+        // Busca os membros
+        const { data: membersData, error: membersError } = await supabase
+          .rpc('get_couple_members', { c_id: data.id });
+          
+        if (!membersError && membersData) {
+          const membersMap = (membersData as Member[]).reduce((acc, member) => {
+            acc[member.id] = member;
+            return acc;
+          }, {} as Record<string, Member>);
+          setMembers(membersMap);
+        }
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -56,6 +77,7 @@ export function CoupleProvider({ children }: { children: ReactNode }) {
 
   const value = {
     couple,
+    members,
     loadingCouple,
     refreshCouple: fetchCouple,
   };

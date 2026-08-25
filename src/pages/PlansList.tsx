@@ -1,13 +1,17 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
-import { Plus, CheckCircle2, Circle, MoreVertical, Trash2, Edit2, Loader2, Tag, CalendarClock } from 'lucide-react';
+import { Plus, CheckCircle2, Circle, MoreVertical, Trash2, Edit2, Loader2, Tag, CalendarClock, User } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useCouple } from '../contexts/CoupleContext';
+import { useAuth } from '../contexts/AuthContext';
 import { Plan, DEFAULT_CATEGORIES } from '../types';
 import { PlanForm } from '../components/PlanForm';
+import { formatDistanceToNow } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 export function PlansList() {
-  const { couple } = useCouple();
+  const { couple, members } = useCouple();
+  const { user } = useAuth();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -231,6 +235,29 @@ export function PlansList() {
                   }`}>
                     {plan.priority}
                   </span>
+                </div>
+
+                <div className="mt-3 pt-3 border-t border-stone-100 flex items-center gap-2 text-xs text-stone-400">
+                  {(() => {
+                    const isMe = plan.created_by_id === user?.id;
+                    const author = isMe ? 'Você' : (members[plan.created_by_id]?.name || members[plan.created_by_id]?.email?.split('@')[0] || 'Parceiro(a)');
+                    const avatar = members[plan.created_by_id]?.avatar_url;
+                    
+                    return (
+                      <>
+                        {avatar ? (
+                          <img src={avatar} alt={author} className="w-4 h-4 rounded-full" />
+                        ) : (
+                          <div className="w-4 h-4 rounded-full bg-stone-100 flex items-center justify-center text-[8px] text-stone-500">
+                            <User size={10} />
+                          </div>
+                        )}
+                        <span className="font-medium text-stone-500">{author}</span>
+                        <span>&middot;</span>
+                        <span>{formatDistanceToNow(new Date(plan.created_at), { addSuffix: true, locale: ptBR })}</span>
+                      </>
+                    );
+                  })()}
                 </div>
               </div>
               
