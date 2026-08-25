@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Send, Trash2, User } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -21,8 +21,22 @@ export function PlanComments({ planId }: PlanCommentsProps) {
   const { members } = useCouple();
   const bottomRef = useRef<HTMLDivElement>(null);
 
+  const fetchComments = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('comments')
+      .select('*')
+      .eq('plan_id', planId)
+      .order('created_at', { ascending: true });
+
+    if (!error && data) {
+      setComments(data as PlanComment[]);
+      setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'auto' }), 100);
+    }
+  }, [planId]);
+
   useEffect(() => {
-    fetchComments();
+    setLoading(true);
+    fetchComments().finally(() => setLoading(false));
 
     const channel = supabase
       .channel(`comments-${planId}`)
@@ -34,13 +48,8 @@ export function PlanComments({ planId }: PlanCommentsProps) {
           table: 'comments',
           filter: `plan_id=eq.${planId}`,
         },
-        (payload) => {
-          if (payload.eventType === 'INSERT') {
-            setComments((prev) => [...prev, payload.new as PlanComment]);
-            setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
-          } else if (payload.eventType === 'DELETE') {
-            setComments((prev) => prev.filter(c => c.id !== payload.old.id));
-          }
+        () => {
+          fetchComments();
         }
       )
       .subscribe();
@@ -48,42 +57,51 @@ export function PlanComments({ planId }: PlanCommentsProps) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [planId]);
+  }, [planId, fetchComments]);
 
-  const fetchComments = async () => {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from('comments')
-      .select('*')
-      .eq('plan_id', planId)
-      .order('created_at', { ascending: true });
-
-    if (!error && data) {
-      setComments(data as PlanComment[]);
-      setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'auto' }), 100);
+  const formatCommentTime = (dateStr?: string) => {
+    if (!dateStr) return '';
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return '';
+      return format(d, "HH:mm", { locale: ptBR });
+    } catch {
+      return '';
     }
-    setLoading(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newComment.trim() || !user || sending) return;
+    const content = newComment.trim();
+    if (!content || !user || sending) return;
 
     setSending(true);
-    
-    // Optimistic UI could be implemented, but simple insert is fast enough
+
     const payload = {
       plan_id: planId,
       user_id: user.id,
-      content: newComment.trim(),
+      content,
+      created_at: new Date().toISOString(),
     };
 
-    const { error } = await supabase.from('comments').insert([payload]);
+    const { data, error } = await supabase
+      .from('comments')
+      .insert([payload])
+      .select();
     
     if (error) {
       alert(`Erro ao salvar comentário: ${error.message}`);
     } else {
       setNewComment('');
+      if (data && data[0]) {
+        setComments(prev => {
+          if (prev.some(c => c.id === data[0].id)) return prev;
+          return [...prev, data[0] as PlanComment];
+        });
+        setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+      } else {
+        fetchComments();
+      }
     }
     
     setSending(false);
@@ -91,8 +109,7 @@ export function PlanComments({ planId }: PlanCommentsProps) {
 
   const handleDelete = async (commentId: string) => {
     if (confirm('Excluir este comentário?')) {
-      // Optimistic delete
-      setComments(comments.filter(c => c.id !== commentId));
+      setComments(prev => prev.filter(c => c.id !== commentId));
       await supabase.from('comments').delete().eq('id', commentId);
     }
   };
@@ -135,7 +152,7 @@ export function PlanComments({ planId }: PlanCommentsProps) {
                   <div className="flex items-baseline gap-2 mb-1 mx-1">
                     <span className="text-[11px] font-medium text-stone-500">{authorName}</span>
                     <span className="text-[10px] text-stone-400">
-                      {format(new Date(comment.created_at), "HH:mm", { locale: ptBR })}
+                      {formatCommentTime(comment.created_at)}
                     </span>
                   </div>
                   

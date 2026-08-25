@@ -153,6 +153,17 @@ export function PlanPhotos({ planId }: PlanPhotosProps) {
     return supabase.storage.from('memories').getPublicUrl(path).data.publicUrl;
   };
 
+  const formatDateSafe = (dateStr?: string, pattern: string = "dd MMM yyyy") => {
+    if (!dateStr) return '';
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return '';
+      return format(d, pattern, { locale: ptBR });
+    } catch {
+      return '';
+    }
+  };
+
   return (
     <div className="space-y-4">
       
@@ -213,7 +224,7 @@ export function PlanPhotos({ planId }: PlanPhotosProps) {
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-3">
                 <Maximize2 size={16} className="text-white absolute top-3 right-3" />
                 <span className="text-[10px] font-medium text-white/90">
-                  {format(new Date(photo.created_at), "dd MMM yyyy", { locale: ptBR })}
+                  {formatDateSafe(photo.created_at, "dd MMM yyyy")}
                 </span>
               </div>
             </div>
@@ -248,7 +259,7 @@ export function PlanPhotos({ planId }: PlanPhotosProps) {
           />
           
           <div className="absolute bottom-6 text-center w-full text-white/70 text-sm font-medium">
-            Adicionado em {format(new Date(previewPhoto.created_at), "dd 'de' MMMM, yyyy", { locale: ptBR })}
+            Adicionado em {formatDateSafe(previewPhoto.created_at, "dd 'de' MMMM, yyyy")}
           </div>
         </div>
       )}
