@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
-import { motion } from 'motion/react';
-import { Plus, CheckCircle2, Circle, MoreVertical, Trash2, Edit2, Loader2, Tag, CalendarClock, User } from 'lucide-react';
+import { useEffect, useState, useMemo } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Plus, CheckCircle2, Circle, MoreVertical, Trash2, Edit2, Loader2, Tag, CalendarClock, User, Search, Filter as FilterIcon } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useCouple } from '../contexts/CoupleContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -16,9 +16,25 @@ export function PlansList() {
   const [loading, setLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState<Plan | undefined>();
-  const [activeTab, setActiveTab] = useState<'quero_fazer' | 'planejado' | 'fizemos'>('quero_fazer');
-  const [selectedCategory, setSelectedCategory] = useState<string>('Todas');
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+
+  // Filters & Search State
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('Todas');
+  const [statusFilter, setStatusFilter] = useState<'todos' | 'quero_fazer' | 'planejado'>('todos');
+  const [priorityFilter, setPriorityFilter] = useState<'todas' | 'baixa' | 'media' | 'alta'>('todas');
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'az'>('newest');
+  const [showCompleted, setShowCompleted] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+
+  const hasActiveFilters = statusFilter !== 'todos' || priorityFilter !== 'todas' || sortBy !== 'newest' || showCompleted;
+
+  const clearFilters = () => {
+    setStatusFilter('todos');
+    setPriorityFilter('todas');
+    setSortBy('newest');
+    setShowCompleted(false);
+  };
 
   const fetchPlans = async () => {
     if (!couple) return;
@@ -103,18 +119,68 @@ export function PlansList() {
     setOpenMenuId(null);
   };
 
-  const currentTabPlans = plans.filter(p => p.status === activeTab);
-  
-  // Counts per category (for the current tab)
-  const categoryCounts = currentTabPlans.reduce((acc, plan) => {
-    acc[plan.category] = (acc[plan.category] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  // Computed data
+  const { filteredPlans, categoryCounts, activeCategories } = useMemo(() => {
+    let result = plans;
 
-  const filteredPlans = currentTabPlans.filter(p => selectedCategory === 'Todas' || p.category === selectedCategory);
-  
-  // Show only categories that have at least one item, plus the 'Todas' option
-  const activeCategories = DEFAULT_CATEGORIES.filter(c => categoryCounts[c] > 0);
+    // 1. Ocultar/Mostrar Concluídos
+    if (!showCompleted) {
+      result = result.filter(p => p.status !== 'fizemos');
+    }
+
+    // 2. Filtro de Status
+    if (statusFilter !== 'todos') {
+      result = result.filter(p => p.status === statusFilter);
+    }
+
+    // 3. Filtro de Prioridade
+    if (priorityFilter !== 'todas') {
+      result = result.filter(p => p.priority === priorityFilter);
+    }
+
+    // 4. Busca por Título ou Descrição
+    if (searchQuery.trim() !== '') {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(p => 
+        p.title.toLowerCase().includes(q) || 
+        (p.description && p.description.toLowerCase().includes(q))
+      );
+    }
+
+    // Calcular as categorias DOS ITENS JÁ FILTRADOS (para a barra horizontal ser coerente)
+    const counts = result.reduce((acc, plan) => {
+      acc[plan.category] = (acc[plan.category] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    // 5. Aplicar o Filtro de Categoria
+    if (selectedCategory !== 'Todas') {
+      result = result.filter(p => p.category === selectedCategory);
+    }
+
+    // 6. Ordenação
+    result = [...result].sort((a, b) => {
+      if (sortBy === 'newest') {
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      }
+      if (sortBy === 'oldest') {
+        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+      }
+      if (sortBy === 'az') {
+        return a.title.localeCompare(b.title);
+      }
+      return 0;
+    });
+
+    const activeCats = DEFAULT_CATEGORIES.filter(c => counts[c] > 0);
+
+    return { filteredPlans: result, categoryCounts: counts, activeCategories: activeCats };
+  }, [plans, showCompleted, statusFilter, priorityFilter, searchQuery, selectedCategory, sortBy]);
+
+  // Contagem total para a pílula "Todas" na barra de categorias (antes do filtro de categoria)
+  const totalInCurrentFilters = useMemo(() => {
+    return Object.values(categoryCounts).reduce((a, b) => a + b, 0);
+  }, [categoryCounts]);
 
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 pb-24 relative">
@@ -128,67 +194,148 @@ export function PlansList() {
         </button>
       </header>
 
-      <div className="flex gap-2 p-1 bg-stone-100 rounded-xl">
-        <button 
-          onClick={() => setActiveTab('quero_fazer')} 
-          className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${activeTab === 'quero_fazer' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}
-        >
-          Quero Fazer
-        </button>
-        <button 
-          onClick={() => setActiveTab('planejado')} 
-          className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${activeTab === 'planejado' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}
-        >
-          Planejado
-        </button>
-        <button 
-          onClick={() => setActiveTab('fizemos')} 
-          className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${activeTab === 'fizemos' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}
-        >
-          Fizemos
-        </button>
-      </div>
-
-      {currentTabPlans.length > 0 && (
-        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
-          <button
-            onClick={() => setSelectedCategory('Todas')}
-            className={`whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-medium transition-colors ${
-              selectedCategory === 'Todas' 
-                ? 'bg-stone-800 text-white' 
-                : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
-            }`}
+      <div className="space-y-4">
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" size={18} />
+            <input 
+              type="text"
+              placeholder="Buscar planos..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 bg-stone-100 border-none rounded-xl text-sm focus:ring-2 focus:ring-orange-500/20 outline-none text-stone-700 placeholder-stone-400"
+            />
+          </div>
+          <button 
+            onClick={() => setShowFilters(!showFilters)}
+            className={`p-2.5 rounded-xl flex items-center justify-center transition-colors border ${showFilters || hasActiveFilters ? 'bg-orange-50 border-orange-200 text-orange-600' : 'bg-white border-stone-200 text-stone-500 hover:bg-stone-50'}`}
           >
-            Todas ({currentTabPlans.length})
+            <FilterIcon size={20} />
+            {hasActiveFilters && (
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-orange-500 border border-white" />
+            )}
           </button>
-          
-          {activeCategories.map(cat => (
+        </div>
+
+        <AnimatePresence>
+          {showFilters && (
+            <motion.div 
+              initial={{ height: 0, opacity: 0 }} 
+              animate={{ height: 'auto', opacity: 1 }} 
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="bg-white border border-stone-200 rounded-2xl p-4 space-y-4 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-semibold text-stone-900">Filtros</span>
+                  {hasActiveFilters && (
+                    <button onClick={clearFilters} className="text-xs text-orange-600 font-medium hover:text-orange-700">Limpar tudo</button>
+                  )}
+                </div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-xs text-stone-500 font-medium mb-2 block uppercase tracking-wider">Status</label>
+                    <div className="flex flex-wrap gap-2">
+                      {['todos', 'quero_fazer', 'planejado'].map(s => (
+                        <button 
+                          key={s} 
+                          onClick={() => setStatusFilter(s as any)}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border ${statusFilter === s ? 'bg-stone-800 border-stone-800 text-white' : 'bg-white border-stone-200 text-stone-600 hover:bg-stone-50'}`}
+                        >
+                          {s === 'todos' ? 'Todos' : s === 'quero_fazer' ? 'Quero Fazer' : 'Planejado'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="text-xs text-stone-500 font-medium mb-2 block uppercase tracking-wider">Prioridade</label>
+                    <div className="flex flex-wrap gap-2">
+                      {['todas', 'baixa', 'media', 'alta'].map(p => (
+                        <button 
+                          key={p}
+                          onClick={() => setPriorityFilter(p as any)}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border ${priorityFilter === p ? 'bg-stone-800 border-stone-800 text-white' : 'bg-white border-stone-200 text-stone-600 hover:bg-stone-50'}`}
+                        >
+                          {p.charAt(0).toUpperCase() + p.slice(1)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-xs text-stone-500 font-medium mb-2 block uppercase tracking-wider">Ordenação</label>
+                    <select 
+                      value={sortBy} 
+                      onChange={e => setSortBy(e.target.value as any)}
+                      className="w-full bg-white border border-stone-200 rounded-lg px-3 py-2 text-sm text-stone-700 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500"
+                    >
+                      <option value="newest">Mais recentes primeiro</option>
+                      <option value="oldest">Mais antigos primeiro</option>
+                      <option value="az">Ordem alfabética (A-Z)</option>
+                    </select>
+                  </div>
+
+                  <div className="pt-3 border-t border-stone-100 flex items-center justify-between">
+                    <div>
+                      <label className="text-sm text-stone-900 font-medium block">Mostrar concluídos</label>
+                      <span className="text-xs text-stone-500">Exibir planos que já fizemos</span>
+                    </div>
+                    <button 
+                      onClick={() => setShowCompleted(!showCompleted)}
+                      className={`w-11 h-6 rounded-full transition-colors relative ${showCompleted ? 'bg-green-500' : 'bg-stone-300'}`}
+                    >
+                      <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform ${showCompleted ? 'translate-x-5' : 'translate-x-0'}`} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {totalInCurrentFilters > 0 && (
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
             <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
+              onClick={() => setSelectedCategory('Todas')}
               className={`whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                selectedCategory === cat 
-                  ? 'bg-orange-600 text-white' 
+                selectedCategory === 'Todas' 
+                  ? 'bg-stone-800 text-white' 
                   : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
               }`}
             >
-              {cat} ({categoryCounts[cat]})
+              Todas ({totalInCurrentFilters})
             </button>
-          ))}
-        </div>
-      )}
+            
+            {activeCategories.map(cat => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={`whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                  selectedCategory === cat 
+                    ? 'bg-orange-600 text-white' 
+                    : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                }`}
+              >
+                {cat} ({categoryCounts[cat]})
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
 
       {loading ? (
         <div className="flex justify-center py-12">
           <Loader2 className="w-8 h-8 animate-spin text-stone-300" />
         </div>
-      ) : currentTabPlans.length === 0 ? (
+      ) : plans.length === 0 ? (
         <div className="text-center py-12 text-stone-500">
-          Nenhum plano {activeTab} por aqui.
+          Você ainda não adicionou nenhum plano.
         </div>
       ) : filteredPlans.length === 0 ? (
         <div className="text-center py-12 text-stone-500">
-          Nenhum plano na categoria {selectedCategory}.
+          Nenhum plano encontrado com os filtros atuais.
         </div>
       ) : (
         <div className="space-y-3">
@@ -308,3 +455,4 @@ export function PlansList() {
     </motion.div>
   );
 }
+

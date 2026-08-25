@@ -51,6 +51,7 @@ export function PlanForm({ plan, onClose, onSuccess }: PlanFormProps) {
             ...payload,
             couple_id: couple.id,
             created_by_id: user.id,
+            status: 'quero_fazer'
           });
         if (insertError) throw insertError;
       }
