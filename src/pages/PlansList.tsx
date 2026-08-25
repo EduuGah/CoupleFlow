@@ -33,6 +33,39 @@ export function PlansList() {
 
   useEffect(() => {
     fetchPlans();
+
+    if (!couple) return;
+
+    const channel = supabase
+      .channel('plans-list-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'plans',
+          filter: `couple_id=eq.${couple.id}`,
+        },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            setPlans((current) => {
+              if (current.some(p => p.id === payload.new.id)) return current;
+              return [payload.new as Plan, ...current];
+            });
+          } else if (payload.eventType === 'UPDATE') {
+            setPlans((current) =>
+              current.map((p) => (p.id === payload.new.id ? { ...p, ...payload.new } as Plan : p))
+            );
+          } else if (payload.eventType === 'DELETE') {
+            setPlans((current) => current.filter((p) => p.id !== payload.old.id));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [couple]);
 
   const changeStatus = async (plan: Plan, newStatus: string) => {

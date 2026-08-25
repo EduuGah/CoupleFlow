@@ -32,7 +32,30 @@ export function Dashboard() {
         setPendingCount(count);
       }
     }
+
     fetchStats();
+
+    if (!couple) return;
+
+    const channel = supabase
+      .channel('dashboard-plans-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'plans',
+          filter: `couple_id=eq.${couple.id}`,
+        },
+        () => {
+          fetchStats();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [couple]);
 
   return (
