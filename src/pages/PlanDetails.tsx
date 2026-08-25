@@ -199,7 +199,7 @@ export function PlanDetails() {
                 <div>
                   <p className="text-xs text-stone-500">Data planejada</p>
                   <p className="text-sm font-medium text-stone-900 mt-0.5">
-                    {format(new Date(plan.planned_date), "dd 'de' MMMM, yyyy", { locale: ptBR })}
+                    {format(new Date(plan.planned_date), "dd 'de' MMMM, yyyy 'às' HH:mm", { locale: ptBR })}
                   </p>
                 </div>
               </div>

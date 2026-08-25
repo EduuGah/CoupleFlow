@@ -24,6 +24,18 @@ export function PlanForm({ plan, onClose, onSuccess }: PlanFormProps) {
   const [category, setCategory] = useState<PlanCategory>(plan?.category || 'Outros');
   const [priority, setPriority] = useState<PlanPriority>(plan?.priority || 'media');
 
+  const formatForInput = (isoString?: string | null) => {
+    if (!isoString) return '';
+    const d = new Date(isoString);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const h = String(d.getHours()).padStart(2, '0');
+    const min = String(d.getMinutes()).padStart(2, '0');
+    return `${y}-${m}-${day}T${h}:${min}`;
+  };
+  const [plannedDate, setPlannedDate] = useState(formatForInput(plan?.planned_date));
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!couple || !user) return;
@@ -36,6 +48,7 @@ export function PlanForm({ plan, onClose, onSuccess }: PlanFormProps) {
         description: description || null,
         category,
         priority,
+        planned_date: plannedDate ? new Date(plannedDate).toISOString() : null,
       };
 
       if (plan) {
@@ -87,6 +100,27 @@ export function PlanForm({ plan, onClose, onSuccess }: PlanFormProps) {
             <textarea value={description} onChange={e => setDescription(e.target.value)} placeholder="Adicione notas, links, etc..." rows={3} className="w-full px-4 py-3 rounded-xl bg-stone-50 border border-stone-200 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-colors resize-none" />
           </div>
 
+          <div>
+            <label className="block text-sm font-medium text-stone-700 mb-1">Data e Hora Planejada (Opcional)</label>
+            <div className="flex gap-2">
+              <input 
+                type="datetime-local" 
+                value={plannedDate}
+                onChange={e => setPlannedDate(e.target.value)}
+                className="flex-1 px-4 py-3 rounded-xl bg-stone-50 border border-stone-200 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-colors"
+              />
+              {plannedDate && (
+                <button 
+                  type="button" 
+                  onClick={() => setPlannedDate('')}
+                  className="px-4 py-3 rounded-xl bg-stone-100 text-stone-600 hover:bg-stone-200 transition-colors"
+                >
+                  Remover
+                </button>
+              )}
+            </div>
+          </div>
+          
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-stone-700 mb-1">Categoria</label>
