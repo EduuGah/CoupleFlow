@@ -1,102 +1,215 @@
-import { useState } from 'react';
-import { mockPlans } from '../data';
-import { EmptyState } from '../components/EmptyState';
-import { Plus, ListTodo } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
-import type { Category } from '../types';
-
-const CATEGORIES: ('Todos' | Category)[] = ['Todos', 'Filmes', 'Restaurantes', 'Viagens', 'Tarefas', 'Outros'];
+import { Plus, CheckCircle2, Circle, MoreVertical, Trash2, Edit2, Loader2, Tag } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { useCouple } from '../contexts/CoupleContext';
+import { Plan, DEFAULT_CATEGORIES } from '../types';
+import { PlanForm } from '../components/PlanForm';
 
 export function PlansList() {
-  const [activeCategory, setActiveCategory] = useState<'Todos' | Category>('Todos');
+  const { couple } = useCouple();
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingPlan, setEditingPlan] = useState<Plan | undefined>();
+  const [activeTab, setActiveTab] = useState<'pendente' | 'concluido'>('pendente');
+  const [selectedCategory, setSelectedCategory] = useState<string>('Todas');
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
-  const filteredPlans = mockPlans.filter(
-    (plan) => activeCategory === 'Todos' || plan.category === activeCategory
-  );
+  const fetchPlans = async () => {
+    if (!couple) return;
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('plans')
+      .select('*')
+      .eq('couple_id', couple.id)
+      .order('created_at', { ascending: false });
+      
+    if (!error && data) {
+      setPlans(data as Plan[]);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchPlans();
+  }, [couple]);
+
+  const toggleStatus = async (plan: Plan) => {
+    const newStatus = plan.status === 'pendente' ? 'concluido' : 'pendente';
+    // Otimistic update
+    setPlans(plans.map(p => p.id === plan.id ? { ...p, status: newStatus } : p));
+    
+    await supabase
+      .from('plans')
+      .update({ status: newStatus })
+      .eq('id', plan.id);
+  };
+
+  const deletePlan = async (id: string) => {
+    // Otimistic update
+    setPlans(plans.filter(p => p.id !== id));
+    await supabase.from('plans').delete().eq('id', id);
+    setOpenMenuId(null);
+  };
+
+  const openEdit = (plan: Plan) => {
+    setEditingPlan(plan);
+    setIsFormOpen(true);
+    setOpenMenuId(null);
+  };
+
+  const currentTabPlans = plans.filter(p => p.status === activeTab);
+  
+  // Counts per category (for the current tab)
+  const categoryCounts = currentTabPlans.reduce((acc, plan) => {
+    acc[plan.category] = (acc[plan.category] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const filteredPlans = currentTabPlans.filter(p => selectedCategory === 'Todas' || p.category === selectedCategory);
+  
+  // Show only categories that have at least one item, plus the 'Todas' option
+  const activeCategories = DEFAULT_CATEGORIES.filter(c => categoryCounts[c] > 0);
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="space-y-6 pb-24 md:pb-0"
-    >
-      <header className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-stone-900">Nossos Planos</h1>
-          <p className="text-stone-500 text-sm mt-1">Organize o que vocês querem fazer.</p>
-        </div>
-        <button className="hidden md:flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-full font-medium transition-colors shadow-sm shadow-orange-600/20">
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 pb-24 relative">
+      <header className="pt-8 pb-2 flex items-center justify-between">
+        <h1 className="text-2xl font-semibold tracking-tight text-stone-900">Planos</h1>
+        <button 
+          onClick={() => { setEditingPlan(undefined); setIsFormOpen(true); }} 
+          className="w-10 h-10 bg-orange-600 text-white rounded-full flex items-center justify-center hover:bg-orange-700 transition-colors shadow-sm"
+        >
           <Plus size={20} />
-          <span>Novo Plano</span>
         </button>
       </header>
 
-      {/* Category Tabs */}
-      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
-        {CATEGORIES.map((cat) => (
-          <button
-            key={cat}
-            onClick={() => setActiveCategory(cat)}
-            className={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-all ${
-              activeCategory === cat
-                ? 'bg-stone-800 text-white shadow-sm'
-                : 'bg-white text-stone-600 border border-stone-200 hover:bg-stone-50'
-            }`}
-          >
-            {cat}
-          </button>
-        ))}
+      <div className="flex gap-2 p-1 bg-stone-100 rounded-xl">
+        <button 
+          onClick={() => setActiveTab('pendente')} 
+          className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${activeTab === 'pendente' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}
+        >
+          Pendentes
+        </button>
+        <button 
+          onClick={() => setActiveTab('concluido')} 
+          className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${activeTab === 'concluido' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}
+        >
+          Concluídos
+        </button>
       </div>
 
-      {/* Plans List */}
-      <div className="space-y-3">
-        {filteredPlans.length > 0 ? (
-          filteredPlans.map((plan) => (
-            <div 
-              key={plan.id}
-              className="bg-white p-4 rounded-2xl border border-stone-200/60 shadow-sm flex items-start gap-4"
+      {currentTabPlans.length > 0 && (
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
+          <button
+            onClick={() => setSelectedCategory('Todas')}
+            className={`whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-medium transition-colors ${
+              selectedCategory === 'Todas' 
+                ? 'bg-stone-800 text-white' 
+                : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+            }`}
+          >
+            Todas ({currentTabPlans.length})
+          </button>
+          
+          {activeCategories.map(cat => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              className={`whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                selectedCategory === cat 
+                  ? 'bg-orange-600 text-white' 
+                  : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+              }`}
             >
-              <div className={`mt-1 w-5 h-5 rounded-full flex-shrink-0 border-2 flex items-center justify-center ${
-                plan.status === 'concluido' ? 'border-green-500 bg-green-500 text-white' : 'border-stone-300'
-              }`}>
-                {plan.status === 'concluido' && (
-                  <svg viewBox="0 0 14 14" fill="none" className="w-3 h-3 stroke-current stroke-[3] stroke-linecap-round stroke-linejoin-round">
-                    <path d="M2.75 7.5L5.5 10.25L11.25 3.5" />
-                  </svg>
-                )}
-              </div>
+              {cat} ({categoryCounts[cat]})
+            </button>
+          ))}
+        </div>
+      )}
+
+      {loading ? (
+        <div className="flex justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-stone-300" />
+        </div>
+      ) : currentTabPlans.length === 0 ? (
+        <div className="text-center py-12 text-stone-500">
+          Nenhum plano {activeTab} por aqui.
+        </div>
+      ) : filteredPlans.length === 0 ? (
+        <div className="text-center py-12 text-stone-500">
+          Nenhum plano na categoria {selectedCategory}.
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {filteredPlans.map(plan => (
+            <div key={plan.id} className="bg-white border border-stone-200/60 rounded-2xl p-4 shadow-sm flex gap-4 relative">
+              <button 
+                onClick={() => toggleStatus(plan)} 
+                className="mt-1 shrink-0 text-stone-400 hover:text-orange-500 transition-colors"
+              >
+                {plan.status === 'concluido' ? <CheckCircle2 className="text-green-500" size={24} /> : <Circle size={24} />}
+              </button>
+              
               <div className="flex-1 min-w-0">
-                <h3 className={`text-base font-medium ${plan.status === 'concluido' ? 'text-stone-400 line-through' : 'text-stone-900'}`}>
-                  {plan.title}
-                </h3>
+                <div className="flex items-center justify-between gap-2">
+                  <h3 className={`font-medium truncate ${plan.status === 'concluido' ? 'text-stone-400 line-through' : 'text-stone-900'}`}>
+                    {plan.title}
+                  </h3>
+                  <button 
+                    onClick={() => setOpenMenuId(openMenuId === plan.id ? null : plan.id)} 
+                    className="p-1 text-stone-400 hover:text-stone-600 rounded-md"
+                  >
+                    <MoreVertical size={16} />
+                  </button>
+                </div>
+                
                 {plan.description && (
-                  <p className="text-sm text-stone-500 mt-0.5 line-clamp-1">{plan.description}</p>
+                  <p className="text-sm text-stone-500 mt-1 line-clamp-2">{plan.description}</p>
                 )}
-                <div className="mt-2">
-                  <span className="inline-flex px-2 py-1 bg-stone-100 text-stone-600 text-[10px] font-medium rounded-md uppercase tracking-wide">
+                
+                <div className="flex items-center gap-2 mt-3">
+                  <span className="text-[10px] font-medium uppercase tracking-wider px-2 py-1 bg-stone-100 text-stone-600 rounded-md">
                     {plan.category}
+                  </span>
+                  <span className={`text-[10px] font-medium uppercase tracking-wider px-2 py-1 rounded-md ${
+                    plan.priority === 'alta' ? 'bg-red-50 text-red-600' :
+                    plan.priority === 'media' ? 'bg-yellow-50 text-yellow-700' :
+                    'bg-stone-50 text-stone-500'
+                  }`}>
+                    {plan.priority}
                   </span>
                 </div>
               </div>
+              
+              {openMenuId === plan.id && (
+                <div className="absolute top-12 right-4 bg-white border border-stone-200 rounded-xl shadow-lg p-1 z-10 min-w-[120px] flex flex-col">
+                  <button 
+                    onClick={() => openEdit(plan)} 
+                    className="flex items-center gap-2 w-full text-left px-3 py-2 text-sm text-stone-700 hover:bg-stone-50 rounded-lg"
+                  >
+                    <Edit2 size={14} /> Editar
+                  </button>
+                  <button 
+                    onClick={() => deletePlan(plan.id)} 
+                    className="flex items-center gap-2 w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg"
+                  >
+                    <Trash2 size={14} /> Excluir
+                  </button>
+                </div>
+              )}
             </div>
-          ))
-        ) : (
-          <EmptyState
-            icon={<ListTodo size={48} />}
-            title="Nenhum plano encontrado"
-            description={
-              activeCategory === 'Todos' 
-                ? 'Vocês ainda não adicionaram nada para fazer. Que tal criar o primeiro plano?'
-                : `Vocês ainda não têm planos na categoria ${activeCategory}.`
-            }
-          />
-        )}
-      </div>
+          ))}
+        </div>
+      )}
 
-      {/* Mobile FAB */}
-      <button className="md:hidden fixed bottom-20 right-4 w-14 h-14 bg-orange-600 text-white rounded-full flex items-center justify-center shadow-lg shadow-orange-600/30 active:scale-95 transition-transform z-40">
-        <Plus size={24} />
-      </button>
+      {isFormOpen && (
+        <PlanForm 
+          plan={editingPlan} 
+          onClose={() => setIsFormOpen(false)} 
+          onSuccess={() => { setIsFormOpen(false); fetchPlans(); }} 
+        />
+      )}
     </motion.div>
   );
 }
