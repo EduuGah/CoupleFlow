@@ -1,0 +1,6 @@
+{
+  "name": "CoupleFlow",
+  "description": "Aplicativo para organização da rotina de casais (filmes, passeios, tarefas, etc).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
