@@ -231,8 +231,7 @@ export function PlanPhotos({ planId }: PlanPhotosProps) {
               className="relative aspect-square rounded-2xl overflow-hidden group bg-stone-100 cursor-pointer"
               onClick={() => setPreviewPhoto(photo)}
             >
-              <img loading="lazy" decoding="async" 
-                src={getImageUrl(photo.storage_path)} 
+              <img loading="lazy" decoding="async" src={getImageUrl(photo.storage_path)} 
                 alt="Memória" 
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 
@@ -286,8 +285,7 @@ export function PlanPhotos({ planId }: PlanPhotosProps) {
             </button>
           </div>
           
-          <img loading="lazy" decoding="async" 
-            src={getImageUrl(previewPhoto.storage_path)} 
+          <img loading="lazy" decoding="async" src={getImageUrl(previewPhoto.storage_path)} 
             alt="Preview" 
             className="max-w-full max-h-[90vh] object-contain rounded-lg"
           />

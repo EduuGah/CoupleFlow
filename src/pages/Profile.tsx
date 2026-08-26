@@ -124,7 +124,7 @@ export function Profile() {
               <div className="relative">
                 <div className="w-24 h-24 rounded-full bg-stone-100 border-4 border-white shadow-sm flex items-center justify-center overflow-hidden">
                   {avatarPreview ? (
-                    <img  decoding="async" src={avatarPreview} alt="Preview" className="w-full h-full object-cover" />
+                    <img loading="lazy" decoding="async" src={avatarPreview} alt="Preview" className="w-full h-full object-cover" />
                   ) : (
                     <UserPlaceholder name={name || user?.email || 'A'} />
                   )}

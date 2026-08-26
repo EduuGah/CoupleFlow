@@ -116,8 +116,7 @@ export function History() {
                 <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white border border-stone-200/60 shadow-sm rounded-3xl overflow-hidden hover:shadow-md transition-shadow">
                   {coverPhoto && (
                     <div className="w-full h-48 md:h-56 bg-stone-100 relative overflow-hidden group-hover:opacity-95 transition-opacity">
-                      <img loading="lazy" decoding="async" 
-                        src={getPublicUrl(coverPhoto)} 
+                      <img loading="lazy" decoding="async" src={getPublicUrl(coverPhoto)} 
                         alt="Memória" 
                         className="w-full h-full object-cover"
                       />
@@ -166,7 +165,7 @@ export function History() {
                         <span className="hidden sm:inline">Criado por:</span>
                         <div className="flex items-center gap-1.5 bg-stone-50 pl-2 pr-3 py-1 rounded-full">
                           {authorAvatar ? (
-                            <img  decoding="async" src={authorAvatar} alt={authorName} className="w-5 h-5 rounded-full object-cover" />
+                            <img loading="lazy" decoding="async" src={authorAvatar} alt={authorName} className="w-5 h-5 rounded-full object-cover" />
                           ) : (
                             <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center text-[10px] text-emerald-700 font-bold">
                               {authorName.charAt(0).toUpperCase()}
