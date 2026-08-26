@@ -19,6 +19,7 @@ const PlanDetails = React.lazy(() => import('./pages/PlanDetails').then(module =
 const Profile = React.lazy(() => import('./pages/Profile').then(module => ({ default: module.Profile })));
 const Randomizer = React.lazy(() => import('./pages/Randomizer').then(module => ({ default: module.Randomizer })));
 const History = React.lazy(() => import('./pages/History').then(module => ({ default: module.History })));
+const Gifts = React.lazy(() => import('./pages/Gifts').then(module => ({ default: module.Gifts })));
 const Auth = React.lazy(() => import('./pages/Auth').then(module => ({ default: module.Auth })));
 const SetupSpace = React.lazy(() => import('./pages/SetupSpace').then(module => ({ default: module.SetupSpace })));
 
@@ -50,6 +51,7 @@ export default function App() {
                   <Route path="plans/:id" element={<PlanDetails />} />
                   <Route path="random" element={<Randomizer />} />
                   <Route path="history" element={<History />} />
+                  <Route path="gifts" element={<Gifts />} />
                   <Route path="profile" element={<Profile />} />
                 </Route>
               </Route>

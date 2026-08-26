@@ -68,6 +68,20 @@ export interface Couple {
   anniversary_date: string | null;
 }
 
+export interface GiftIdea {
+  id: string;
+  couple_id: string;
+  created_by_id: string;
+  intended_for_id: string;
+  title: string;
+  description: string | null;
+  price: number | null;
+  link: string | null;
+  is_purchased: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Member {
   id: string;
   name: string | null;
