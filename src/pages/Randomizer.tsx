@@ -4,9 +4,9 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Dices, Play, CheckCircle2, CalendarClock, RefreshCcw } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useCouple } from '../contexts/CoupleContext';
-import { Plan, PlanCategory } from '../types';
+import { DEFAULT_CATEGORIES, Plan, PlanCategory } from '../types';
 
-const FILTERS = ['Qualquer', 'Comer', 'Assistir', 'Visitar', 'Fazer', 'Viajar'] as const;
+const FILTERS = ['Qualquer', ...DEFAULT_CATEGORIES] as const;
 type FilterType = typeof FILTERS[number];
 
 export function Randomizer() {
