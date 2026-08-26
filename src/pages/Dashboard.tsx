@@ -5,6 +5,7 @@ import { useCouple } from '../contexts/CoupleContext';
 import { useAuth } from '../contexts/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { Plan } from '../types';
+import { DashboardSkeleton } from '../components/Skeletons';
 import { EmptyState } from '../components/EmptyState';
 import { format, isBefore } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -95,9 +96,7 @@ export function Dashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="w-8 h-8 border-4 border-orange-100 border-t-orange-500 rounded-full animate-spin"></div>
-      </div>
+      <DashboardSkeleton />
     );
   }
 

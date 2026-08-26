@@ -8,6 +8,7 @@ import { ptBR } from 'date-fns/locale';
 import { Star, Image as ImageIcon, MessageCircle, MapPin, Calendar, Heart, Award } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { EmptyState } from '../components/EmptyState';
+import { HistorySkeleton } from '../components/Skeletons';
 
 // Extend Plan to include photos from subquery
 interface HistoryPlan extends Plan {
@@ -58,9 +59,7 @@ export function History() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="w-8 h-8 border-4 border-emerald-100 border-t-emerald-500 rounded-full animate-spin"></div>
-      </div>
+      <HistorySkeleton />
     );
   }
 

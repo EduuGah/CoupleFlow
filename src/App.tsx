@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import React, { Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { CoupleProvider } from './contexts/CoupleContext';
@@ -11,14 +12,21 @@ import { Toaster } from 'react-hot-toast';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { RequireCoupleRoute } from './components/RequireCoupleRoute';
 import { Layout } from './components/Layout';
-import { Dashboard } from './pages/Dashboard';
-import { PlansList } from './pages/PlansList';
-import { PlanDetails } from './pages/PlanDetails';
-import { Profile } from './pages/Profile';
-import { Randomizer } from './pages/Randomizer';
-import { History } from './pages/History';
-import { Auth } from './pages/Auth';
-import { SetupSpace } from './pages/SetupSpace';
+
+const Dashboard = React.lazy(() => import('./pages/Dashboard').then(module => ({ default: module.Dashboard })));
+const PlansList = React.lazy(() => import('./pages/PlansList').then(module => ({ default: module.PlansList })));
+const PlanDetails = React.lazy(() => import('./pages/PlanDetails').then(module => ({ default: module.PlanDetails })));
+const Profile = React.lazy(() => import('./pages/Profile').then(module => ({ default: module.Profile })));
+const Randomizer = React.lazy(() => import('./pages/Randomizer').then(module => ({ default: module.Randomizer })));
+const History = React.lazy(() => import('./pages/History').then(module => ({ default: module.History })));
+const Auth = React.lazy(() => import('./pages/Auth').then(module => ({ default: module.Auth })));
+const SetupSpace = React.lazy(() => import('./pages/SetupSpace').then(module => ({ default: module.SetupSpace })));
+
+const PageLoader = () => (
+  <div className="flex min-h-screen w-full items-center justify-center bg-stone-50/50">
+    <div className="w-8 h-8 border-4 border-stone-200 border-t-stone-800 rounded-full animate-spin"></div>
+  </div>
+);
 
 export default function App() {
   return (
@@ -26,6 +34,7 @@ export default function App() {
       <CoupleProvider>
         <NotificationsProvider>
           <BrowserRouter>
+          <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route path="/auth" element={<Auth />} />
             
@@ -46,6 +55,7 @@ export default function App() {
               </Route>
             </Route>
           </Routes>
+          </Suspense>
         </BrowserRouter>
           <Toaster position="top-center" />
         </NotificationsProvider>

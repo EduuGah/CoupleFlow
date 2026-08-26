@@ -10,6 +10,7 @@ import { PlanForm } from '../components/PlanForm';
 import { EmptyState } from '../components/EmptyState';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { PlansListSkeleton } from '../components/Skeletons';
 
 export function PlansList() {
   const { couple, members } = useCouple();
@@ -315,9 +316,7 @@ export function PlansList() {
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-stone-300" />
-        </div>
+        <PlansListSkeleton />
       ) : plans.length === 0 ? (
         <EmptyState
           icon={<ListTodo size={48} />}

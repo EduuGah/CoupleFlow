@@ -28,6 +28,13 @@ export function Profile() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+      
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('A foto deve ter no máximo 5MB');
+        e.target.value = '';
+        return;
+      }
+
       setAvatarFile(file);
       setAvatarPreview(URL.createObjectURL(file));
     }

@@ -12,6 +12,7 @@ import { PlanPhotos } from '../components/PlanPhotos';
 import { PlanEvaluation } from '../components/PlanEvaluation';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { PlanDetailsSkeleton } from '../components/Skeletons';
 
 export function PlanDetails() {
   const { id } = useParams();
@@ -101,9 +102,7 @@ export function PlanDetails() {
 
   if (loading) {
     return (
-      <div className="flex justify-center py-20">
-        <div className="w-8 h-8 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin"></div>
-      </div>
+      <PlanDetailsSkeleton />
     );
   }
 

@@ -74,8 +74,8 @@ export function PlanPhotos({ planId }: PlanPhotosProps) {
     }
     
     // 5MB limit
-    if (file.size > 20 * 1024 * 1024) {
-      setErrorMsg('A imagem é muito grande. O tamanho máximo permitido é 20MB.');
+    if (file.size > 5 * 1024 * 1024) {
+      setErrorMsg('A foto deve ter no máximo 5MB.');
       setTimeout(() => setErrorMsg(null), 4000);
       return;
     }
