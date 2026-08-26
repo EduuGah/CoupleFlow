@@ -44,8 +44,8 @@ export function Auth() {
         className="w-full max-w-md bg-white rounded-3xl p-8 border border-stone-200/60 shadow-xl shadow-stone-200/20"
       >
         <div className="flex flex-col items-center mb-8">
-          <div className="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center mb-4 rotate-3">
-            <Heart size={32} className="fill-orange-500 text-orange-500" />
+          <div className="w-16 h-16 mb-4 relative">
+            <img src="/icon.svg" alt="CoupleFlow Logo" className="w-full h-full object-contain" />
           </div>
           <h1 className="text-2xl font-semibold tracking-tight text-stone-900">CoupleFlow</h1>
           <p className="text-stone-500 mt-1 text-sm">

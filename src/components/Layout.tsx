@@ -17,7 +17,10 @@ export function Layout() {
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex flex-col w-64 fixed top-0 left-0 h-screen border-r border-stone-200 bg-white/50 backdrop-blur-md px-4 py-8 z-50">
         <div className="mb-10 px-4">
-          <h1 className="text-2xl font-semibold tracking-tight text-stone-900">CoupleFlow</h1>
+          <div className="flex items-center gap-2">
+            <img src="/icon.svg" alt="CoupleFlow Logo" className="w-8 h-8" />
+            <h1 className="text-2xl font-semibold tracking-tight text-stone-900">CoupleFlow</h1>
+          </div>
         </div>
         <div className="absolute top-7 right-4">
           <NotificationsMenu />
@@ -44,7 +47,10 @@ export function Layout() {
 
       {/* Mobile Top Bar (Only visible on small screens) */}
       <header className="md:hidden sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-stone-200 px-4 h-14 flex items-center justify-between">
-        <h1 className="text-lg font-semibold tracking-tight text-stone-900">CoupleFlow</h1>
+        <div className="flex items-center gap-2">
+          <img src="/icon.svg" alt="CoupleFlow Logo" className="w-6 h-6" />
+          <h1 className="text-lg font-semibold tracking-tight text-stone-900">CoupleFlow</h1>
+        </div>
         <NotificationsMenu />
       </header>
       

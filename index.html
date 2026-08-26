@@ -1,18 +1,50 @@
 <!doctype html>
-<html lang="en">
+<html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Google AI Studio App</title>
-    <meta name="description" content="An application built with Google AI Studio." />
-    <meta property="og:title" content="My Google AI Studio App" />
-    <meta property="og:description" content="An application built with Google AI Studio." />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#FDFBF7" />
+    
+    <title>CoupleFlow</title>
+    <meta name="description" content="Nosso espaço para organizar planos e memórias." />
+    
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="alternate icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    
+    <meta property="og:title" content="CoupleFlow" />
+    <meta property="og:description" content="Nosso espaço para organizar planos e memórias." />
     <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:card" content="summary" />
   </head>
   <body>
-    <div id="root"></div>
+        <div id="root">
+      <style>
+        .initial-loader {
+          position: fixed;
+          top: 0; left: 0; width: 100vw; height: 100vh;
+          display: flex; flex-direction: column; align-items: center; justify-content: center;
+          background-color: #FDFBF7;
+          font-family: system-ui, -apple-system, sans-serif;
+          z-index: 9999;
+        }
+        .initial-loader svg {
+          width: 64px; height: 64px;
+          animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: .7; transform: scale(0.95); }
+        }
+      </style>
+      <div class="initial-loader">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="64" height="64">
+          <path fill="#f97316" d="M256 461.3L254.3 460.1C180.8 412.8 61.1 324.2 61.1 241.7C61.1 170.3 115.8 115 186.5 115C217.3 115 246 129.5 263.8 154.1C281.6 129.5 310.3 115 341.1 115C411.8 115 466.5 170.3 466.5 241.7C466.5 324.2 346.8 412.8 273.3 460.1L256 461.3Z"/>
+        </svg>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-

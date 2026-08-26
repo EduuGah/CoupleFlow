@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Heart, Settings, LogOut, Copy, Check, Edit2, Camera, Loader2, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
