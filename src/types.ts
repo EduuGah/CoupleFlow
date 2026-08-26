@@ -26,6 +26,9 @@ export interface Plan {
   planned_date: string | null;
   completed_at: string | null;
   image_url: string | null;
+  rating: number | null;
+  evaluation: string | null;
+  evaluated_at: string | null;
   created_at: string;
   updated_at: string;
 }

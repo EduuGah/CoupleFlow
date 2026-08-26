@@ -9,6 +9,7 @@ import { Plan } from '../types';
 import { PlanForm } from '../components/PlanForm';
 import { PlanComments } from '../components/PlanComments';
 import { PlanPhotos } from '../components/PlanPhotos';
+import { PlanEvaluation } from '../components/PlanEvaluation';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -247,6 +248,8 @@ export function PlanDetails() {
             <span className="text-xs font-medium">Fizemos</span>
           </button>
         </div>
+
+        <PlanEvaluation plan={plan} onUpdate={(updatedPlan) => setPlan(updatedPlan)} />
 
         {/* Future Extensions Placeholders */}
         <div className="space-y-3 pt-6">
