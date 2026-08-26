@@ -13,8 +13,8 @@ export default defineConfig(() => {
         registerType: 'autoUpdate',
         includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'icon.svg'],
         manifest: {
-          name: 'CoupleFlow',
-          short_name: 'CoupleFlow',
+          name: 'Together',
+          short_name: 'Together',
           description: 'Nosso espaço para organizar planos e memórias.',
           theme_color: '#FDFBF7',
           background_color: '#FDFBF7',

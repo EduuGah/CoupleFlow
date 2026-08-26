@@ -2,11 +2,11 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from './AuthContext';
 import { useCouple } from './CoupleContext';
-import { Notification } from '../types';
+import { AppNotification } from '../types';
 import toast from 'react-hot-toast';
 
 interface NotificationsContextData {
-  notifications: Notification[];
+  notifications: AppNotification[];
   unreadCount: number;
   markAsRead: (id: string) => Promise<void>;
   markAllAsRead: () => Promise<void>;
@@ -17,7 +17,7 @@ const NotificationsContext = createContext<NotificationsContextData>({} as Notif
 export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
   const { couple, members } = useCouple();
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notifications, setNotifications] = useState<AppNotification[]>([]);
 
   useEffect(() => {
     if (!user || !couple) {
@@ -26,6 +26,11 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     }
 
     fetchNotifications();
+
+    // Request native notification permission if supported
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
 
     const channel = supabase
       .channel('notifications-channel')
@@ -38,7 +43,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
           filter: `user_id=eq.${user.id}`,
         },
         (payload) => {
-          const newNotif = payload.new as Notification;
+          const newNotif = payload.new as AppNotification;
           setNotifications(prev => [newNotif, ...prev]);
           
           // Optionally show a toast for new notifications if actor exists in members
@@ -53,6 +58,14 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
             default: message = `Nova notificação de ${actorName}`;
           }
           toast(message, { icon: '🔔' });
+
+          // Also trigger a native browser notification if granted
+          if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification('Together', {
+              body: message,
+              icon: '/icon.svg',
+            });
+          }
         }
       )
       .on(

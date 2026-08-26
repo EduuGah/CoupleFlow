@@ -51,7 +51,7 @@ export interface PlanPhoto {
 
 export type NotificationType = 'plan_added' | 'plan_scheduled' | 'plan_completed' | 'comment_added' | 'photo_added';
 
-export interface Notification {
+export interface AppNotification {
   id: string;
   couple_id: string;
   user_id: string;
