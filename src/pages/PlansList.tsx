@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Plus, CheckCircle2, Circle, MoreVertical, Trash2, Edit2, Loader2, Tag, CalendarClock, User, Search, Filter as FilterIcon } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -13,19 +13,20 @@ import { ptBR } from 'date-fns/locale';
 export function PlansList() {
   const { couple, members } = useCouple();
   const { user } = useAuth();
+  const location = useLocation();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(location.state?.openAddForm || false);
   const [editingPlan, setEditingPlan] = useState<Plan | undefined>();
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
   // Filters & Search State
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('Todas');
-  const [statusFilter, setStatusFilter] = useState<'todos' | 'quero_fazer' | 'planejado'>('todos');
+  const [statusFilter, setStatusFilter] = useState<'todos' | 'quero_fazer' | 'planejado'>(location.state?.statusFilter || 'todos');
   const [priorityFilter, setPriorityFilter] = useState<'todas' | 'baixa' | 'media' | 'alta'>('todas');
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'az'>('newest');
-  const [showCompleted, setShowCompleted] = useState(false);
+  const [showCompleted, setShowCompleted] = useState(location.state?.showCompleted || false);
   const [showFilters, setShowFilters] = useState(false);
 
   const hasActiveFilters = statusFilter !== 'todos' || priorityFilter !== 'todas' || sortBy !== 'newest' || showCompleted;
@@ -125,7 +126,9 @@ export function PlansList() {
     let result = plans;
 
     // 1. Ocultar/Mostrar Concluídos
-    if (!showCompleted) {
+    if (showCompleted) {
+      result = result.filter(p => p.status === 'fizemos');
+    } else {
       result = result.filter(p => p.status !== 'fizemos');
     }
 
