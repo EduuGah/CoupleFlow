@@ -43,7 +43,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
           
           // Optionally show a toast for new notifications if actor exists in members
           const rawName = members[newNotif.actor_id]?.name;
-          const actorName = (rawName && rawName !== 'Seu amor' && rawName !== 'Alguém') ? rawName.split(' ')[0] : 'Seu amor';
+          const actorName = (rawName && rawName !== 'Seu par' && rawName !== 'Alguém') ? rawName.split(' ')[0] : 'Seu par';
           let message = '';
           switch (newNotif.type) {
             case 'plan_added': message = `${actorName} adicionou um novo plano!`; break;

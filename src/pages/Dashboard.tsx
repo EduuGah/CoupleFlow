@@ -108,7 +108,7 @@ export function Dashboard() {
     >
       <header className="pt-8">
         <h1 className="text-3xl font-semibold tracking-tight text-stone-900">
-          Olá, {user?.user_metadata?.name?.split(' ')[0] || 'Amor'}
+          {user?.user_metadata?.name ? `Olá, ${user.user_metadata.name.split(' ')[0]}` : 'Olá!'}
         </h1>
         <p className="text-stone-500 mt-1">
           O que vamos fazer no espaço <span className="font-medium text-stone-700">{couple?.name}</span>?

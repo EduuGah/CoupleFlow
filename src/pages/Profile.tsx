@@ -145,7 +145,7 @@ export function Profile() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-stone-500 uppercase tracking-wider mb-1">Como seu amor te chama?</label>
+                <label className="block text-xs font-medium text-stone-500 uppercase tracking-wider mb-1">Seu nome ou apelido</label>
                 <input
                   type="text"
                   value={name}
@@ -177,7 +177,7 @@ export function Profile() {
         
         {/* Invite Code Area */}
         <div className="mt-5">
-          <p className="text-xs font-medium text-stone-500 uppercase tracking-wider mb-2">Código para convidar seu amor</p>
+          <p className="text-xs font-medium text-stone-500 uppercase tracking-wider mb-2">Código de convite</p>
           <div className="flex items-center justify-between bg-white border border-stone-200 rounded-xl p-2 pl-4">
             <code className="text-stone-600 font-mono text-xs truncate max-w-[200px]">
               {couple?.id || 'Carregando...'}

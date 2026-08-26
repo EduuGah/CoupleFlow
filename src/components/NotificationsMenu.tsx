@@ -31,7 +31,7 @@ export function NotificationsMenu() {
   };
 
   const getNotificationText = (type: string, actorName: string) => {
-    const firstName = (actorName && actorName !== 'Seu amor' && actorName !== 'Alguém') ? actorName.split(' ')[0] : 'Seu amor';
+    const firstName = (actorName && actorName !== 'Seu par' && actorName !== 'Alguém') ? actorName.split(' ')[0] : 'Seu par';
     switch (type) {
       case 'plan_added': return `${firstName} adicionou um novo plano`;
       case 'plan_scheduled': return `${firstName} planejou uma data`;
@@ -89,7 +89,7 @@ export function NotificationsMenu() {
               ) : (
                 <div className="divide-y divide-stone-50">
                   {notifications.map(notif => {
-                    const actorName = members[notif.actor_id]?.name || 'Seu amor';
+                    const actorName = members[notif.actor_id]?.name || 'Seu par';
                     const avatar = members[notif.actor_id]?.avatar_url;
                     const date = new Date(notif.created_at);
 
