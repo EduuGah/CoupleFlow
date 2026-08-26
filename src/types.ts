@@ -48,3 +48,16 @@ export interface PlanPhoto {
   storage_path: string;
   created_at: string;
 }
+
+export type NotificationType = 'plan_added' | 'plan_scheduled' | 'plan_completed' | 'comment_added' | 'photo_added';
+
+export interface Notification {
+  id: string;
+  couple_id: string;
+  user_id: string;
+  actor_id: string;
+  plan_id: string;
+  type: NotificationType;
+  is_read: boolean;
+  created_at: string;
+}

@@ -1,6 +1,7 @@
 import { NavLink, Outlet } from 'react-router-dom';
 import { Home, ListTodo, User, Dices, History as HistoryIcon } from 'lucide-react';
 import { motion } from 'motion/react';
+import { NotificationsMenu } from './NotificationsMenu';
 
 export function Layout() {
   const navItems = [
@@ -14,9 +15,12 @@ export function Layout() {
   return (
     <div className="min-h-screen bg-[#FDFBF7] text-stone-800 font-sans pb-20 md:pb-0 md:pl-64 flex flex-col">
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col w-64 fixed top-0 left-0 h-screen border-r border-stone-200 bg-white/50 backdrop-blur-md px-4 py-8">
+      <aside className="hidden md:flex flex-col w-64 fixed top-0 left-0 h-screen border-r border-stone-200 bg-white/50 backdrop-blur-md px-4 py-8 z-50">
         <div className="mb-10 px-4">
           <h1 className="text-2xl font-semibold tracking-tight text-stone-900">CoupleFlow</h1>
+        </div>
+        <div className="absolute top-7 right-4">
+          <NotificationsMenu />
         </div>
         <nav className="flex flex-col gap-2 flex-1">
           {navItems.map((item) => (
@@ -38,6 +42,12 @@ export function Layout() {
         </nav>
       </aside>
 
+      {/* Mobile Top Bar (Only visible on small screens) */}
+      <header className="md:hidden sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-stone-200 px-4 h-14 flex items-center justify-between">
+        <h1 className="text-lg font-semibold tracking-tight text-stone-900">CoupleFlow</h1>
+        <NotificationsMenu />
+      </header>
+      
       {/* Main Content Area */}
       <main className="flex-1 w-full max-w-4xl mx-auto p-4 md:p-8 md:pt-12">
         <Outlet />

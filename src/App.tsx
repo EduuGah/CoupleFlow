@@ -6,6 +6,8 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { CoupleProvider } from './contexts/CoupleContext';
+import { NotificationsProvider } from './contexts/NotificationsContext';
+import { Toaster } from 'react-hot-toast';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { RequireCoupleRoute } from './components/RequireCoupleRoute';
 import { Layout } from './components/Layout';
@@ -22,7 +24,8 @@ export default function App() {
   return (
     <AuthProvider>
       <CoupleProvider>
-        <BrowserRouter>
+        <NotificationsProvider>
+          <BrowserRouter>
           <Routes>
             <Route path="/auth" element={<Auth />} />
             
@@ -44,6 +47,8 @@ export default function App() {
             </Route>
           </Routes>
         </BrowserRouter>
+          <Toaster position="top-center" />
+        </NotificationsProvider>
       </CoupleProvider>
     </AuthProvider>
   );

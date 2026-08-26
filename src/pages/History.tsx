@@ -52,7 +52,7 @@ export function History() {
   };
 
   const getPublicUrl = (path: string) => {
-    return supabase.storage.from('couple_spaces').getPublicUrl(path).data.publicUrl;
+    return supabase.storage.from('memories').getPublicUrl(path).data.publicUrl;
   };
 
   if (loading) {
