@@ -14,6 +14,7 @@ import { PlansList } from './pages/PlansList';
 import { PlanDetails } from './pages/PlanDetails';
 import { Profile } from './pages/Profile';
 import { Randomizer } from './pages/Randomizer';
+import { History } from './pages/History';
 import { Auth } from './pages/Auth';
 import { SetupSpace } from './pages/SetupSpace';
 
@@ -36,6 +37,7 @@ export default function App() {
                   <Route path="plans" element={<PlansList />} />
                   <Route path="plans/:id" element={<PlanDetails />} />
                   <Route path="random" element={<Randomizer />} />
+                  <Route path="history" element={<History />} />
                   <Route path="profile" element={<Profile />} />
                 </Route>
               </Route>

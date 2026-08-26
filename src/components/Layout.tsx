@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom';
-import { Home, ListTodo, User, Dices } from 'lucide-react';
+import { Home, ListTodo, User, Dices, History as HistoryIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 
 export function Layout() {
@@ -7,6 +7,7 @@ export function Layout() {
     { to: '/', icon: <Home size={24} />, label: 'Início' },
     { to: '/plans', icon: <ListTodo size={24} />, label: 'Planos' },
     { to: '/random', icon: <Dices size={24} />, label: 'Sorteio' },
+    { to: '/history', icon: <HistoryIcon size={24} />, label: 'Memórias' },
     { to: '/profile', icon: <User size={24} />, label: 'Nós' },
   ];
 

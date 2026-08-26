@@ -26,17 +26,15 @@ export function PlansList() {
   const [statusFilter, setStatusFilter] = useState<'todos' | 'quero_fazer' | 'planejado'>(location.state?.statusFilter || 'todos');
   const [priorityFilter, setPriorityFilter] = useState<'todas' | 'baixa' | 'media' | 'alta'>('todas');
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'az'>('newest');
-  const [showCompleted, setShowCompleted] = useState(location.state?.showCompleted || false);
-  const [showFilters, setShowFilters] = useState(false);
+    const [showFilters, setShowFilters] = useState(false);
 
-  const hasActiveFilters = statusFilter !== 'todos' || priorityFilter !== 'todas' || sortBy !== 'newest' || showCompleted;
+  const hasActiveFilters = statusFilter !== 'todos' || priorityFilter !== 'todas' || sortBy !== 'newest' ;
 
   const clearFilters = () => {
     setStatusFilter('todos');
     setPriorityFilter('todas');
     setSortBy('newest');
-    setShowCompleted(false);
-  };
+      };
 
   const fetchPlans = async () => {
     if (!couple) return;
@@ -126,11 +124,8 @@ export function PlansList() {
     let result = plans;
 
     // 1. Ocultar/Mostrar Concluídos
-    if (showCompleted) {
-      result = result.filter(p => p.status === 'fizemos');
-    } else {
-      result = result.filter(p => p.status !== 'fizemos');
-    }
+    // 1. Ocultar Concluídos (agora exclusivos da página de Histórico)
+    result = result.filter(p => p.status !== 'fizemos');
 
     // 2. Filtro de Status
     if (statusFilter !== 'todos') {
@@ -179,7 +174,7 @@ export function PlansList() {
     const activeCats = DEFAULT_CATEGORIES.filter(c => counts[c] > 0);
 
     return { filteredPlans: result, categoryCounts: counts, activeCategories: activeCats };
-  }, [plans, showCompleted, statusFilter, priorityFilter, searchQuery, selectedCategory, sortBy]);
+  }, [plans, statusFilter, priorityFilter, searchQuery, selectedCategory, sortBy]);
 
   // Contagem total para a pílula "Todas" na barra de categorias (antes do filtro de categoria)
   const totalInCurrentFilters = useMemo(() => {
@@ -281,18 +276,7 @@ export function PlansList() {
                     </select>
                   </div>
 
-                  <div className="pt-3 border-t border-stone-100 flex items-center justify-between">
-                    <div>
-                      <label className="text-sm text-stone-900 font-medium block">Mostrar concluídos</label>
-                      <span className="text-xs text-stone-500">Exibir planos que já fizemos</span>
-                    </div>
-                    <button 
-                      onClick={() => setShowCompleted(!showCompleted)}
-                      className={`w-11 h-6 rounded-full transition-colors relative ${showCompleted ? 'bg-green-500' : 'bg-stone-300'}`}
-                    >
-                      <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform ${showCompleted ? 'translate-x-5' : 'translate-x-0'}`} />
-                    </button>
-                  </div>
+                  
                 </div>
               </div>
             </motion.div>

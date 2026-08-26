@@ -150,7 +150,7 @@ export function Dashboard() {
 
         {/* Action 4: History */}
         <button
-          onClick={() => navigate('/plans', { state: { showCompleted: true } })}
+          onClick={() => navigate('/history')}
           className="bg-emerald-50 border border-emerald-100/50 text-emerald-700 p-4 rounded-3xl flex flex-col items-center justify-center gap-1 hover:bg-emerald-100 transition-colors shadow-sm"
         >
           <span className="text-3xl font-semibold">{metrics.concluidos}</span>
@@ -225,6 +225,9 @@ export function Dashboard() {
         <div className="pt-4">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold text-stone-900 tracking-tight">Últimas memórias</h2>
+            <button onClick={() => navigate('/history')} className="text-sm font-medium text-emerald-600 hover:text-emerald-700 flex items-center gap-1">
+              Ver todas <ArrowRight size={16} />
+            </button>
           </div>
           
           <div className="flex gap-4 overflow-x-auto pb-6 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0 snap-x">
