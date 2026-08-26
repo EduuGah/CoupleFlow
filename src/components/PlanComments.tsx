@@ -16,10 +16,11 @@ export function PlanComments({ planId }: PlanCommentsProps) {
   const [newComment, setNewComment] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   
   const { user } = useAuth();
   const { members } = useCouple();
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const fetchComments = useCallback(async () => {
     const { data, error } = await supabase
@@ -30,7 +31,7 @@ export function PlanComments({ planId }: PlanCommentsProps) {
 
     if (!error && data) {
       setComments(data as PlanComment[]);
-      setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'auto' }), 100);
+      setTimeout(() => { if (scrollContainerRef.current) scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight; }, 100);
     }
   }, [planId]);
 
@@ -98,7 +99,7 @@ export function PlanComments({ planId }: PlanCommentsProps) {
           if (prev.some(c => c.id === data[0].id)) return prev;
           return [...prev, data[0] as PlanComment];
         });
-        setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+        setTimeout(() => { if (scrollContainerRef.current) scrollContainerRef.current.scrollTo({ top: scrollContainerRef.current.scrollHeight, behavior: 'smooth' }); }, 100);
       } else {
         fetchComments();
       }
@@ -108,9 +109,13 @@ export function PlanComments({ planId }: PlanCommentsProps) {
   };
 
   const handleDelete = async (commentId: string) => {
-    if (confirm('Excluir este comentário?')) {
-      setComments(prev => prev.filter(c => c.id !== commentId));
-      await supabase.from('comments').delete().eq('id', commentId);
+    setComments(prev => prev.filter(c => c.id !== commentId));
+    const { error } = await supabase.from('comments').delete().eq('id', commentId);
+    if (error) {
+      console.error('Delete error:', error);
+      setErrorMsg('Não foi possível excluir o comentário.');
+      setTimeout(() => setErrorMsg(null), 4000);
+      fetchComments();
     }
   };
 
@@ -125,13 +130,19 @@ export function PlanComments({ planId }: PlanCommentsProps) {
   return (
     <div className="space-y-4">
       {/* Messages List */}
-      <div className="space-y-4 max-h-[400px] overflow-y-auto px-1 py-2">
+      <div ref={scrollContainerRef} className="space-y-4 max-h-[400px] overflow-y-auto px-1 py-2">
         {comments.length === 0 ? (
           <p className="text-center text-sm text-stone-400 py-4">
             Nenhum comentário ainda. Comece a planejar!
           </p>
         ) : (
-          comments.map((comment) => {
+          <>
+            {errorMsg && (
+              <div className="bg-red-50 text-red-600 text-xs text-center p-2 rounded-lg mb-2">
+                {errorMsg}
+              </div>
+            )}
+            {comments.map((comment) => {
             const isMe = comment.user_id === user?.id;
             const author = members[comment.user_id];
             const authorName = isMe ? 'Você' : (author?.name || author?.email?.split('@')[0] || 'Parceiro(a)');
@@ -167,7 +178,7 @@ export function PlanComments({ planId }: PlanCommentsProps) {
                     {isMe && (
                       <button
                         onClick={() => handleDelete(comment.id)}
-                        className="absolute -left-10 top-1/2 -translate-y-1/2 p-2 text-stone-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute -left-8 top-1/2 -translate-y-1/2 p-2 text-stone-300 hover:text-red-500 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                         title="Excluir comentário"
                       >
                         <Trash2 size={14} />
@@ -177,9 +188,10 @@ export function PlanComments({ planId }: PlanCommentsProps) {
                 </div>
               </div>
             );
-          })
+          })}
+          </>
         )}
-        <div ref={bottomRef} />
+        
       </div>
 
       {/* Input Form */}

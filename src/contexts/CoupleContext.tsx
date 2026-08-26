@@ -38,6 +38,8 @@ export function CoupleProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    setLoadingCouple(true);
+
     try {
       const { data, error } = await supabase
         .from('couples')

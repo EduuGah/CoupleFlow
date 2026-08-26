@@ -15,6 +15,8 @@ export function PlanPhotos({ planId }: PlanPhotosProps) {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [previewPhoto, setPreviewPhoto] = useState<PlanPhoto | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [photoToDelete, setPhotoToDelete] = useState<PlanPhoto | null>(null);
   
   const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -66,13 +68,15 @@ export function PlanPhotos({ planId }: PlanPhotosProps) {
     
     // Validation
     if (!file.type.startsWith('image/')) {
-      alert('Por favor, selecione apenas arquivos de imagem.');
+      setErrorMsg('Por favor, selecione apenas arquivos de imagem.');
+      setTimeout(() => setErrorMsg(null), 4000);
       return;
     }
     
     // 5MB limit
-    if (file.size > 5 * 1024 * 1024) {
-      alert('A imagem é muito grande. O tamanho máximo permitido é 5MB.');
+    if (file.size > 20 * 1024 * 1024) {
+      setErrorMsg('A imagem é muito grande. O tamanho máximo permitido é 20MB.');
+      setTimeout(() => setErrorMsg(null), 4000);
       return;
     }
 
@@ -96,7 +100,7 @@ export function PlanPhotos({ planId }: PlanPhotosProps) {
       if (uploadError) throw uploadError;
 
       // Save to database
-      const { error: dbError } = await supabase
+      const { data, error: dbError } = await supabase
         .from('plan_photos')
         .insert([
           {
@@ -104,13 +108,21 @@ export function PlanPhotos({ planId }: PlanPhotosProps) {
             user_id: user.id,
             storage_path: filePath,
           }
-        ]);
+        ])
+        .select('*');
 
       if (dbError) throw dbError;
+      
+      if (data && data[0]) {
+        setPhotos(prev => [data[0], ...prev]);
+      } else {
+        fetchPhotos();
+      }
 
     } catch (error: any) {
       console.error(error);
-      alert(`Erro ao fazer upload da imagem: ${error.message}`);
+      setErrorMsg(`Erro ao fazer upload: ${error.message || 'Falha desconhecida'}. Se o erro for sobre o bucket, lembre-se de criá-lo (memories) no painel do Supabase com as políticas públicas corretas.`);
+      setTimeout(() => setErrorMsg(null), 8000);
     } finally {
       setUploading(false);
       // Reset input
@@ -121,17 +133,15 @@ export function PlanPhotos({ planId }: PlanPhotosProps) {
   };
 
   const handleDelete = async (photo: PlanPhoto) => {
-    if (!confirm('Tem certeza que deseja excluir esta foto?')) return;
+    setPhotoToDelete(null);
+    // Close preview and update UI immediately
+    if (previewPhoto?.id === photo.id) {
+      setPreviewPhoto(null);
+    }
+    setPhotos(prev => prev.filter(p => p.id !== photo.id));
 
     try {
-      // Delete from storage
-      const { error: storageError } = await supabase.storage
-        .from('memories')
-        .remove([photo.storage_path]);
-        
-      if (storageError) throw storageError;
-
-      // Delete from database
+      // Delete from database first
       const { error: dbError } = await supabase
         .from('plan_photos')
         .delete()
@@ -139,13 +149,16 @@ export function PlanPhotos({ planId }: PlanPhotosProps) {
 
       if (dbError) throw dbError;
       
-      setPhotos(photos.filter(p => p.id !== photo.id));
-      if (previewPhoto?.id === photo.id) {
-        setPreviewPhoto(null);
-      }
+      // Delete from storage
+      await supabase.storage
+        .from('memories')
+        .remove([photo.storage_path]);
+        
     } catch (error: any) {
       console.error(error);
-      alert(`Erro ao excluir a imagem: ${error.message}`);
+      setErrorMsg('Não foi possível excluir a foto.');
+      setTimeout(() => setErrorMsg(null), 4000);
+      fetchPhotos(); // Revert UI
     }
   };
 
@@ -165,11 +178,16 @@ export function PlanPhotos({ planId }: PlanPhotosProps) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 relative">
       
       {/* Upload Action */}
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-medium text-stone-500 uppercase tracking-wider px-2">Galeria</h3>
+        {errorMsg && (
+          <div className="absolute top-12 left-0 right-0 mx-4 bg-red-50 border border-red-100 text-red-600 text-xs p-3 rounded-xl z-10 shadow-sm">
+            {errorMsg}
+          </div>
+        )}
         
         <div>
           <input 
@@ -222,7 +240,19 @@ export function PlanPhotos({ planId }: PlanPhotosProps) {
                 loading="lazy"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-3">
-                <Maximize2 size={16} className="text-white absolute top-3 right-3" />
+                <div className="absolute top-3 right-3 flex gap-2">
+                  {user?.id === photo.user_id && (
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); setPhotoToDelete(photo); }}
+                      className="p-1.5 bg-black/40 hover:bg-red-500 rounded-full text-white backdrop-blur-sm transition-colors"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  )}
+                  <div className="p-1.5 bg-black/40 rounded-full text-white backdrop-blur-sm">
+                    <Maximize2 size={14} />
+                  </div>
+                </div>
                 <span className="text-[10px] font-medium text-white/90">
                   {formatDateSafe(photo.created_at, "dd MMM yyyy")}
                 </span>
@@ -238,7 +268,7 @@ export function PlanPhotos({ planId }: PlanPhotosProps) {
           <div className="absolute top-4 right-4 flex gap-3">
             {user?.id === previewPhoto.user_id && (
               <button 
-                onClick={() => handleDelete(previewPhoto)}
+                onClick={() => setPhotoToDelete(previewPhoto)}
                 className="w-10 h-10 rounded-full bg-white/10 text-white hover:bg-red-500 hover:text-white transition-colors flex items-center justify-center"
               >
                 <Trash2 size={20} />
@@ -264,6 +294,34 @@ export function PlanPhotos({ planId }: PlanPhotosProps) {
         </div>
       )}
 
+      {/* Delete Modal */}
+      {photoToDelete && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-xl flex flex-col items-center text-center">
+            <div className="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-4">
+              <Trash2 size={24} />
+            </div>
+            <h3 className="text-lg font-medium text-stone-900 mb-2">Excluir foto?</h3>
+            <p className="text-sm text-stone-500 mb-6">
+              Esta ação não pode ser desfeita. A foto será apagada permanentemente.
+            </p>
+            <div className="flex gap-3 w-full">
+              <button 
+                onClick={() => setPhotoToDelete(null)}
+                className="flex-1 py-3 px-4 rounded-xl font-medium text-stone-700 bg-stone-100 hover:bg-stone-200 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button 
+                onClick={() => handleDelete(photoToDelete)}
+                className="flex-1 py-3 px-4 rounded-xl font-medium text-white bg-red-500 hover:bg-red-600 transition-colors"
+              >
+                Excluir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
