@@ -1,12 +1,13 @@
 import { useEffect, useState, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { Plus, CheckCircle2, Circle, MoreVertical, Trash2, Edit2, Loader2, Tag, CalendarClock, User, Search, Filter as FilterIcon } from 'lucide-react';
+import { Plus, CheckCircle2, Circle, MoreVertical, Trash2, Edit2, Loader2, Tag, CalendarClock, User, Search, Filter as FilterIcon, ListTodo } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useCouple } from '../contexts/CoupleContext';
 import { useAuth } from '../contexts/AuthContext';
 import { Plan, DEFAULT_CATEGORIES } from '../types';
 import { PlanForm } from '../components/PlanForm';
+import { EmptyState } from '../components/EmptyState';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -318,13 +319,19 @@ export function PlansList() {
           <Loader2 className="w-8 h-8 animate-spin text-stone-300" />
         </div>
       ) : plans.length === 0 ? (
-        <div className="text-center py-12 text-stone-500">
-          Você ainda não adicionou nenhum plano.
-        </div>
+        <EmptyState
+          icon={<ListTodo size={48} />}
+          title="Nenhum plano criado"
+          description="Vocês ainda não adicionaram nenhum plano na lista. Que tal criar o primeiro agora mesmo?"
+          action={<button onClick={() => setIsFormOpen(true)} className="px-4 py-2 bg-stone-900 text-white rounded-xl text-sm font-medium hover:bg-stone-800 transition-colors">Criar Plano</button>}
+        />
       ) : filteredPlans.length === 0 ? (
-        <div className="text-center py-12 text-stone-500">
-          Nenhum plano encontrado com os filtros atuais.
-        </div>
+        <EmptyState
+          icon={<FilterIcon size={48} />}
+          title="Nenhum resultado"
+          description="Nenhum plano corresponde aos filtros selecionados."
+          action={<button onClick={clearFilters} className="text-orange-600 font-medium hover:text-orange-700">Limpar filtros</button>}
+        />
       ) : (
         <div className="space-y-3">
           {filteredPlans.map(plan => (
@@ -385,7 +392,7 @@ export function PlansList() {
                     return (
                       <>
                         {avatar ? (
-                          <img src={avatar} alt={author} className="w-4 h-4 rounded-full" />
+                          <img loading="lazy" decoding="async" src={avatar} alt={author} className="w-4 h-4 rounded-full" />
                         ) : (
                           <div className="w-4 h-4 rounded-full bg-stone-100 flex items-center justify-center text-[8px] text-stone-500">
                             <User size={10} />

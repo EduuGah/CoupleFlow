@@ -62,7 +62,6 @@ export function Profile() {
       setIsEditing(false);
       refreshCouple(); // Atualiza membros globalmente
     } catch (err: any) {
-      console.error(err);
       toast.error('Erro ao atualizar perfil.');
     } finally {
       setLoading(false);
@@ -93,12 +92,14 @@ export function Profile() {
             <button 
               onClick={() => setIsEditing(true)}
               className="absolute top-4 right-4 p-2 text-stone-400 hover:text-stone-900 bg-stone-50 hover:bg-stone-100 rounded-full transition-colors"
+              aria-label="Editar perfil"
+              title="Editar perfil"
             >
               <Edit2 size={16} />
             </button>
             <div className="w-24 h-24 rounded-full bg-stone-100 border-4 border-white shadow-sm flex items-center justify-center overflow-hidden mb-4">
               {user?.user_metadata?.avatar_url ? (
-                <img src={user.user_metadata.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                <img loading="lazy" decoding="async" src={user.user_metadata.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
               ) : (
                 <UserPlaceholder name={user?.user_metadata?.name || user?.email || 'A'} />
               )}
@@ -114,7 +115,7 @@ export function Profile() {
           <div className="flex flex-col animate-in fade-in zoom-in-95 duration-200">
             <div className="flex justify-between items-center mb-6">
               <h3 className="font-medium text-stone-900">Editar Perfil</h3>
-              <button onClick={cancelEdit} className="p-2 text-stone-400 hover:bg-stone-50 rounded-full transition-colors">
+              <button onClick={cancelEdit} className="p-2 text-stone-400 hover:bg-stone-50 rounded-full transition-colors" aria-label="Cancelar edição" title="Cancelar">
                 <X size={20} />
               </button>
             </div>
@@ -123,7 +124,7 @@ export function Profile() {
               <div className="relative">
                 <div className="w-24 h-24 rounded-full bg-stone-100 border-4 border-white shadow-sm flex items-center justify-center overflow-hidden">
                   {avatarPreview ? (
-                    <img src={avatarPreview} alt="Preview" className="w-full h-full object-cover" />
+                    <img  decoding="async" src={avatarPreview} alt="Preview" className="w-full h-full object-cover" />
                   ) : (
                     <UserPlaceholder name={name || user?.email || 'A'} />
                   )}
@@ -177,6 +178,8 @@ export function Profile() {
             <button
               onClick={copyInviteCode}
               className="p-2 bg-stone-50 rounded-lg border border-stone-100 hover:border-orange-500 hover:text-orange-600 transition-colors text-stone-400"
+              aria-label="Copiar código de convite"
+              title="Copiar código"
             >
               {copied ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
             </button>

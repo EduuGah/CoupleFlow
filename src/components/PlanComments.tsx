@@ -112,7 +112,6 @@ export function PlanComments({ planId }: PlanCommentsProps) {
     setComments(prev => prev.filter(c => c.id !== commentId));
     const { error } = await supabase.from('comments').delete().eq('id', commentId);
     if (error) {
-      console.error('Delete error:', error);
       setErrorMsg('Não foi possível excluir o comentário.');
       setTimeout(() => setErrorMsg(null), 4000);
       fetchComments();
@@ -152,7 +151,7 @@ export function PlanComments({ planId }: PlanCommentsProps) {
                 {/* Avatar */}
                 <div className="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center shrink-0 overflow-hidden">
                   {author?.avatar_url ? (
-                    <img src={author.avatar_url} alt={authorName} className="w-full h-full object-cover" />
+                    <img loading="lazy" decoding="async" src={author.avatar_url} alt={authorName} className="w-full h-full object-cover" />
                   ) : (
                     <User size={14} className="text-stone-400" />
                   )}
@@ -180,6 +179,7 @@ export function PlanComments({ planId }: PlanCommentsProps) {
                         onClick={() => handleDelete(comment.id)}
                         className="absolute -left-8 top-1/2 -translate-y-1/2 p-2 text-stone-300 hover:text-red-500 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                         title="Excluir comentário"
+                        aria-label="Excluir comentário"
                       >
                         <Trash2 size={14} />
                       </button>
@@ -213,6 +213,8 @@ export function PlanComments({ planId }: PlanCommentsProps) {
           type="submit"
           disabled={!newComment.trim() || sending}
           className="absolute right-2 bottom-2 p-2 rounded-xl bg-orange-500 text-white disabled:opacity-50 disabled:bg-stone-200 hover:bg-orange-600 transition-colors flex items-center justify-center"
+          aria-label="Enviar comentário"
+          title="Enviar comentário"
         >
           <Send size={16} className={sending ? "animate-pulse" : ""} />
         </button>

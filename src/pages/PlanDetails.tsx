@@ -119,14 +119,16 @@ export function PlanDetails() {
         <button 
           onClick={() => navigate('/plans')}
           className="p-2 -ml-2 rounded-full hover:bg-stone-100 text-stone-600 transition-colors"
+          aria-label="Voltar"
+          title="Voltar"
         >
           <ArrowLeft size={20} />
         </button>
         <div className="flex items-center gap-2">
-          <button onClick={() => setIsEditing(true)} className="p-2 rounded-full hover:bg-stone-100 text-stone-600 transition-colors">
+          <button onClick={() => setIsEditing(true)} className="p-2 rounded-full hover:bg-stone-100 text-stone-600 transition-colors" aria-label="Editar plano" title="Editar plano">
             <Edit2 size={18} />
           </button>
-          <button onClick={deletePlan} className="p-2 rounded-full hover:bg-red-50 text-red-500 transition-colors">
+          <button onClick={deletePlan} className="p-2 rounded-full hover:bg-red-50 text-red-500 transition-colors" aria-label="Excluir plano" title="Excluir plano">
             <Trash2 size={18} />
           </button>
         </div>
@@ -176,7 +178,7 @@ export function PlanDetails() {
               <div>
                 <p className="text-xs text-stone-500">Adicionado por</p>
                 <div className="flex items-center gap-2 mt-0.5">
-                  {authorAvatar && <img src={authorAvatar} alt={authorName} className="w-4 h-4 rounded-full" />}
+                  {authorAvatar && <img loading="lazy" decoding="async" src={authorAvatar} alt={authorName} className="w-4 h-4 rounded-full" />}
                   <p className="text-sm font-medium text-stone-900">{authorName}</p>
                 </div>
               </div>

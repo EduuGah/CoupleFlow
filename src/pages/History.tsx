@@ -7,6 +7,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Star, Image as ImageIcon, MessageCircle, MapPin, Calendar, Heart, Award } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { EmptyState } from '../components/EmptyState';
 
 // Extend Plan to include photos from subquery
 interface HistoryPlan extends Plan {
@@ -82,16 +83,12 @@ export function History() {
       </header>
 
       {memories.length === 0 ? (
-        <div className="bg-stone-50 border border-stone-200/60 rounded-[2rem] p-8 text-center flex flex-col items-center justify-center">
-          <Award size={48} className="text-stone-300 mb-4" />
-          <h3 className="text-lg font-medium text-stone-900 mb-1">Ainda não há memórias</h3>
-          <p className="text-sm text-stone-500 max-w-sm mx-auto">
-            Quando vocês concluírem um plano, ele aparecerá aqui no diário de vocês.
-          </p>
-          <Link to="/plans" className="mt-6 px-6 py-2.5 bg-stone-900 text-white rounded-full text-sm font-medium hover:bg-stone-800 transition-colors">
-            Ver nossos planos
-          </Link>
-        </div>
+        <EmptyState
+          icon={<Award size={48} />}
+          title="Ainda não há memórias"
+          description="Quando vocês concluírem um plano, ele aparecerá aqui no diário de vocês."
+          action={<Link to="/plans" className="px-6 py-2.5 bg-stone-900 text-white rounded-full text-sm font-medium hover:bg-stone-800 transition-colors">Ver nossos planos</Link>}
+        />
       ) : (
         <div className="relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-stone-200 before:to-transparent">
           {memories.map((memory, idx) => {
@@ -119,7 +116,7 @@ export function History() {
                 <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white border border-stone-200/60 shadow-sm rounded-3xl overflow-hidden hover:shadow-md transition-shadow">
                   {coverPhoto && (
                     <div className="w-full h-48 md:h-56 bg-stone-100 relative overflow-hidden group-hover:opacity-95 transition-opacity">
-                      <img 
+                      <img loading="lazy" decoding="async" 
                         src={getPublicUrl(coverPhoto)} 
                         alt="Memória" 
                         className="w-full h-full object-cover"
@@ -169,7 +166,7 @@ export function History() {
                         <span className="hidden sm:inline">Criado por:</span>
                         <div className="flex items-center gap-1.5 bg-stone-50 pl-2 pr-3 py-1 rounded-full">
                           {authorAvatar ? (
-                            <img src={authorAvatar} alt={authorName} className="w-5 h-5 rounded-full object-cover" />
+                            <img  decoding="async" src={authorAvatar} alt={authorName} className="w-5 h-5 rounded-full object-cover" />
                           ) : (
                             <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center text-[10px] text-emerald-700 font-bold">
                               {authorName.charAt(0).toUpperCase()}

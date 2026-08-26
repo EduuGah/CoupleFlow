@@ -61,3 +61,16 @@ export interface Notification {
   is_read: boolean;
   created_at: string;
 }
+
+export interface Couple {
+  id: string;
+  name: string | null;
+  anniversary_date: string | null;
+}
+
+export interface Member {
+  id: string;
+  name: string | null;
+  email: string | null;
+  avatar_url: string | null;
+}

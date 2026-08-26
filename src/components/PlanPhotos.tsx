@@ -120,7 +120,6 @@ export function PlanPhotos({ planId }: PlanPhotosProps) {
       }
 
     } catch (error: any) {
-      console.error(error);
       setErrorMsg(`Erro ao fazer upload: ${error.message || 'Falha desconhecida'}. Se o erro for sobre o bucket, lembre-se de criá-lo (memories) no painel do Supabase com as políticas públicas corretas.`);
       setTimeout(() => setErrorMsg(null), 8000);
     } finally {
@@ -155,7 +154,6 @@ export function PlanPhotos({ planId }: PlanPhotosProps) {
         .remove([photo.storage_path]);
         
     } catch (error: any) {
-      console.error(error);
       setErrorMsg('Não foi possível excluir a foto.');
       setTimeout(() => setErrorMsg(null), 4000);
       fetchPhotos(); // Revert UI
@@ -233,11 +231,11 @@ export function PlanPhotos({ planId }: PlanPhotosProps) {
               className="relative aspect-square rounded-2xl overflow-hidden group bg-stone-100 cursor-pointer"
               onClick={() => setPreviewPhoto(photo)}
             >
-              <img 
+              <img loading="lazy" decoding="async" 
                 src={getImageUrl(photo.storage_path)} 
                 alt="Memória" 
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                loading="lazy"
+                
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-3">
                 <div className="absolute top-3 right-3 flex gap-2">
@@ -245,6 +243,8 @@ export function PlanPhotos({ planId }: PlanPhotosProps) {
                     <button 
                       onClick={(e) => { e.stopPropagation(); setPhotoToDelete(photo); }}
                       className="p-1.5 bg-black/40 hover:bg-red-500 rounded-full text-white backdrop-blur-sm transition-colors"
+                      aria-label="Excluir foto"
+                      title="Excluir foto"
                     >
                       <Trash2 size={14} />
                     </button>
@@ -270,6 +270,8 @@ export function PlanPhotos({ planId }: PlanPhotosProps) {
               <button 
                 onClick={() => setPhotoToDelete(previewPhoto)}
                 className="w-10 h-10 rounded-full bg-white/10 text-white hover:bg-red-500 hover:text-white transition-colors flex items-center justify-center"
+                aria-label="Excluir foto"
+                title="Excluir foto"
               >
                 <Trash2 size={20} />
               </button>
@@ -277,12 +279,14 @@ export function PlanPhotos({ planId }: PlanPhotosProps) {
             <button 
               onClick={() => setPreviewPhoto(null)}
               className="w-10 h-10 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors flex items-center justify-center"
+              aria-label="Fechar visualização"
+              title="Fechar"
             >
               <X size={20} />
             </button>
           </div>
           
-          <img 
+          <img loading="lazy" decoding="async" 
             src={getImageUrl(previewPhoto.storage_path)} 
             alt="Preview" 
             className="max-w-full max-h-[90vh] object-contain rounded-lg"

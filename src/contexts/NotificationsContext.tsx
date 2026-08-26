@@ -92,7 +92,6 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         setNotifications(data);
       }
     } catch (err) {
-      console.log('Notifications table might not exist yet.');
     }
   };
 

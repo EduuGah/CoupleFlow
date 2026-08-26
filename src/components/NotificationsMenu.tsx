@@ -101,7 +101,7 @@ export function NotificationsMenu() {
                       >
                         <div className="shrink-0 relative mt-1">
                           {avatar ? (
-                            <img src={avatar} alt={actorName} className="w-10 h-10 rounded-full object-cover" />
+                            <img loading="lazy" decoding="async" src={avatar} alt={actorName} className="w-10 h-10 rounded-full object-cover" />
                           ) : (
                             <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold">
                               {actorName.charAt(0).toUpperCase()}

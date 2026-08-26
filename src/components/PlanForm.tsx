@@ -82,7 +82,7 @@ export function PlanForm({ plan, onClose, onSuccess }: PlanFormProps) {
       <div className="bg-white w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
         <div className="flex items-center justify-between p-4 border-b border-stone-100 shrink-0">
           <h2 className="font-semibold text-lg text-stone-900">{plan ? 'Editar Plano' : 'Novo Plano'}</h2>
-          <button onClick={onClose} className="p-2 text-stone-400 hover:text-stone-700 bg-stone-50 rounded-full transition-colors">
+          <button type="button" onClick={onClose} className="p-2 text-stone-400 hover:text-stone-700 bg-stone-50 rounded-full transition-colors" aria-label="Fechar formulário" title="Fechar">
             <X size={18} />
           </button>
         </div>

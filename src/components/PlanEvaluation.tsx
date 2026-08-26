@@ -60,6 +60,7 @@ export function PlanEvaluation({ plan, onUpdate }: PlanEvaluationProps) {
           onClick={() => setIsEditing(true)}
           className="absolute top-4 right-4 p-2 text-stone-300 hover:text-orange-500 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
           title="Editar Avaliação"
+          aria-label="Editar Avaliação"
         >
           <Edit2 size={16} />
         </button>
@@ -105,6 +106,8 @@ export function PlanEvaluation({ plan, onUpdate }: PlanEvaluationProps) {
             key={star}
             onClick={() => setRating(star)}
             className="transition-transform hover:scale-110 focus:outline-none"
+            aria-label={`Dar ${star} estrela${star > 1 ? 's' : ''}`}
+            title={`${star} estrela${star > 1 ? 's' : ''}`}
           >
             <Star 
               size={32} 

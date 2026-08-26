@@ -1,19 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from './AuthContext';
-
-interface Couple {
-  id: string;
-  name: string | null;
-  anniversary_date: string | null;
-}
-
-interface Member {
-  id: string;
-  name: string | null;
-  email: string | null;
-  avatar_url: string | null;
-}
+import { Couple, Member } from '../types';
 
 interface CoupleContextType {
   couple: Couple | null;
@@ -48,7 +36,6 @@ export function CoupleProvider({ children }: { children: ReactNode }) {
         .single();
 
       if (error && error.code !== 'PGRST116') {
-        console.error('Erro ao buscar espaço do casal:', error);
       }
 
       setCouple(data || null);
@@ -67,7 +54,6 @@ export function CoupleProvider({ children }: { children: ReactNode }) {
         }
       }
     } catch (err) {
-      console.error(err);
     } finally {
       setLoadingCouple(false);
     }

@@ -5,6 +5,7 @@ import { useCouple } from '../contexts/CoupleContext';
 import { useAuth } from '../contexts/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { Plan } from '../types';
+import { EmptyState } from '../components/EmptyState';
 import { format, isBefore } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { 
@@ -181,11 +182,11 @@ export function Dashboard() {
         </div>
 
         {upcomingPlans.length === 0 ? (
-          <div className="bg-stone-50 border border-stone-200/60 rounded-[2rem] p-8 text-center flex flex-col items-center justify-center">
-            <Calendar size={32} className="text-stone-300 mb-3" />
-            <h3 className="text-sm font-medium text-stone-900 mb-1">Agenda livre</h3>
-            <p className="text-sm text-stone-500">Sem planos com data marcada.</p>
-          </div>
+          <EmptyState
+            icon={<Calendar size={32} />}
+            title="Agenda livre"
+            description="Vocês ainda não possuem planos com datas marcadas para os próximos dias."
+          />
         ) : (
           <div className="space-y-3">
             {upcomingPlans.map(plan => {
