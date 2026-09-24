@@ -2,6 +2,17 @@
 
 O **Together** é um aplicativo web moderno, responsivo e focado em casais, criado para organizar, sortear, e registrar planos e memórias a dois. Construído com foco absoluto em usabilidade, performance e *design offline-first* e elegante.
 
+## 🔑 Testar sem criar conta
+
+**[Abrir o CoupleFlow](https://couple-flow.vercel.app/)** e entrar com uma das duas pessoas do casal de demonstração:
+
+| Pessoa | Usuário    | Senha      |
+| ------ | ---------- | ---------- |
+| Ana    | `admin`    | `admin`    |
+| Léo    | `parceiro` | `parceiro` |
+
+A tela de entrada tem um botão para cada uma. Abra as duas em abas diferentes (uma anônima) para ver um plano criado por uma pessoa aparecer para a outra, com notificação. As contas, o casal e alguns planos de exemplo são criados por [`demo-accounts.sql`](demo-accounts.sql) — cole no SQL Editor do Supabase e execute; pode rodar de novo quando quiser.
+
 ---
 
 ## 📸 Funcionalidades
